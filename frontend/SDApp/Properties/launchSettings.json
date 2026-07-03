@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SDApp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SDApp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+[project]
+name = "sdapp-backend"
+version = "0.1.0"
+description = "SDApp local image-generation backend"
+readme = "README.md"
+authors = [
+    { name = "ひかり", email = "hikari.photon+dev@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate>=1.14.0",
+    "diffusers>=0.39.0",
+    "fastapi>=0.139.0",
+    "huggingface-hub>=1.22.0",
+    "pillow>=12.3.0",
+    "pydantic>=2.13.4",
+    "safetensors>=0.8.0",
+    "torch>=2.4",
+    "torchvision>=0.21.0",
+    "transformers>=5.13.0",
+    "uvicorn[standard]>=0.49.0",
+]
+
+[project.scripts]
+sdapp-backend = "sdapp_backend.main:run"
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
+torchvision = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.20",
+]
