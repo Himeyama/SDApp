@@ -138,7 +138,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                     Sampler = samplers[0];
                 }
 
-                DeviceInfo = $"{health.Device} / {health.LoadedModel}";
+                DeviceInfo = $"{health.Device} / {DisplayNameFor(health.LoadedModel)}";
                 IsBackendReady = true;
                 StatusText = ResourceLoader.GetString("Generation_Ready");
             });
@@ -152,8 +152,11 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     public async Task RefreshDeviceInfoAsync(BackendApiClient apiClient, CancellationToken ct)
     {
         HealthInfo health = await apiClient.GetHealthAsync(ct).ConfigureAwait(false);
-        _dispatcherQueue.TryEnqueue(() => DeviceInfo = $"{health.Device} / {health.LoadedModel}");
+        _dispatcherQueue.TryEnqueue(() => DeviceInfo = $"{health.Device} / {DisplayNameFor(health.LoadedModel)}");
     }
+
+    static string DisplayNameFor(string modelId) =>
+        Path.Exists(modelId) ? Path.GetFileNameWithoutExtension(modelId) : modelId;
 
     public async Task GenerateAsync(CancellationToken ct)
     {
