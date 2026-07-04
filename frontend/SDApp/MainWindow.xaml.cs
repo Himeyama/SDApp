@@ -23,13 +23,12 @@ public sealed partial class MainWindow : Window
 
         Closed += MainWindow_Closed;
 
-        RootFrame.Navigate(typeof(GenerationPage));
+        GenerationPage generationPage = new();
+        generationPage.StatusChanged += (_, status) => StatusBarTextBlock.Text = status;
+        generationPage.DeviceInfoChanged += (_, deviceInfo) => StatusBarDeviceInfoTextBlock.Text = deviceInfo;
+        generationPage.NotifyCurrentStatus();
 
-        if (RootFrame.Content is GenerationPage generationPage)
-        {
-            generationPage.StatusChanged += (_, status) => StatusBarTextBlock.Text = status;
-            generationPage.DeviceInfoChanged += (_, deviceInfo) => StatusBarDeviceInfoTextBlock.Text = deviceInfo;
-        }
+        RootFrame.Content = generationPage;
 
         _ = StartBackendAsync();
     }

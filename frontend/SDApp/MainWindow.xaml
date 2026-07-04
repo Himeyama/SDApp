@@ -27,7 +27,7 @@
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0" Text="Ready"
+                <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0" Text="Backend starting..."
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
                 <TextBlock x:Name="StatusBarDeviceInfoTextBlock" Grid.Column="1"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />
