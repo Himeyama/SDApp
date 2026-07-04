@@ -10,34 +10,34 @@
     <Grid ColumnDefinitions="420,*" Padding="20" ColumnSpacing="20">
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12">
-                <TextBlock Text="Prompt" Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                <TextBox x:Name="PromptTextBox" AcceptsReturn="True" Height="100"
-                         TextWrapping="Wrap" PlaceholderText="a cat wearing sunglasses" />
+                <TextBlock x:Uid="Generation_PromptLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                <TextBox x:Name="PromptTextBox" x:Uid="Generation_PromptTextBox" AcceptsReturn="True" Height="100"
+                         TextWrapping="Wrap" />
 
-                <TextBlock Text="Negative prompt" Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                <TextBox x:Name="NegativePromptTextBox" AcceptsReturn="True" Height="70"
-                         TextWrapping="Wrap" PlaceholderText="low quality, blurry" />
+                <TextBlock x:Uid="Generation_NegativePromptLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                <TextBox x:Name="NegativePromptTextBox" x:Uid="Generation_NegativePromptTextBox" AcceptsReturn="True" Height="70"
+                         TextWrapping="Wrap" />
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <StackPanel Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Sampler" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="Generation_SamplerLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <ComboBox x:Name="SamplerComboBox" HorizontalAlignment="Stretch" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Seed (empty = random)" Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                        <TextBox x:Name="SeedTextBox" PlaceholderText="random" />
+                        <TextBlock x:Uid="Generation_SeedLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                        <TextBox x:Name="SeedTextBox" x:Uid="Generation_SeedTextBox" />
                     </StackPanel>
                 </Grid>
 
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Steps" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                    <TextBlock x:Uid="Generation_StepsLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                     <Slider x:Name="StepsSlider" Minimum="1" Maximum="150" Value="20"
                             TickFrequency="10" ValueChanged="StepsSlider_ValueChanged" />
                     <TextBlock x:Name="StepsValueTextBlock" Text="20" Opacity="0.7" />
                 </StackPanel>
 
                 <StackPanel Spacing="4">
-                    <TextBlock Text="CFG scale" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                    <TextBlock x:Uid="Generation_CfgScaleLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                     <Slider x:Name="CfgScaleSlider" Minimum="0" Maximum="30" Value="7"
                             StepFrequency="0.5" TickFrequency="5" ValueChanged="CfgScaleSlider_ValueChanged" />
                     <TextBlock x:Name="CfgScaleValueTextBlock" Text="7.0" Opacity="0.7" />
@@ -45,20 +45,20 @@
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <StackPanel Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Width" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="Generation_WidthLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <NumberBox x:Name="WidthNumberBox" Minimum="64" Maximum="2048"
                                    SmallChange="8" LargeChange="64" Value="512"
                                    SpinButtonPlacementMode="Compact" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Height" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="Generation_HeightLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <NumberBox x:Name="HeightNumberBox" Minimum="64" Maximum="2048"
                                    SmallChange="8" LargeChange="64" Value="512"
                                    SpinButtonPlacementMode="Compact" />
                     </StackPanel>
                 </Grid>
 
-                <Button x:Name="GenerateButton" Content="⠋ Backend starting..." HorizontalAlignment="Stretch"
+                <Button x:Name="GenerateButton" HorizontalAlignment="Stretch"
                         Style="{ThemeResource AccentButtonStyle}" Click="GenerateButton_Click" IsEnabled="False" />
             </StackPanel>
         </ScrollViewer>

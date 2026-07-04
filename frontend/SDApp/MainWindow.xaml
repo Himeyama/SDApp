@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:SDApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="SDApp"
+    x:Uid="MainWindow"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -17,7 +17,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
                         Margin="16,0,0,0" Spacing="8">
                 <FontIcon Glyph="&#xE91B;" FontSize="16" VerticalAlignment="Center" />
-                <TextBlock Text="SDApp" Style="{ThemeResource CaptionTextBlockStyle}"
+                <TextBlock x:Uid="MainWindow_TitleBarText" Style="{ThemeResource CaptionTextBlockStyle}"
                            VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
@@ -27,7 +27,7 @@
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0" Text="Backend starting..."
+                <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
                 <TextBlock x:Name="StatusBarDeviceInfoTextBlock" Grid.Column="1"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />

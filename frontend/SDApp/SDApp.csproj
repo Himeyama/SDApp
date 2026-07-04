@@ -11,11 +11,17 @@
     <SelfContained>true</SelfContained>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DefaultLanguage>en-US</DefaultLanguage>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Assets\*.png" />
     <Content Include="Assets\*.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\ja-JP\Resources.resw" />
   </ItemGroup>
 
   <ItemGroup>

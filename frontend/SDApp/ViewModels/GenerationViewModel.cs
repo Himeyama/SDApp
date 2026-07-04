@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Windows.ApplicationModel.Resources;
 using SDApp.Models;
 using SDApp.Services;
 using Windows.Storage.Streams;
@@ -11,6 +12,8 @@ namespace SDApp.ViewModels;
 
 sealed class GenerationViewModel : INotifyPropertyChanged
 {
+    static readonly ResourceLoader ResourceLoader = new();
+
     readonly DispatcherQueue _dispatcherQueue;
 
     BackendApiClient? _apiClient;
@@ -22,7 +25,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     int _height = 512;
     string _sampler = "euler_a";
     string _seedText = "";
-    string _statusText = "Backend starting...";
+    string _statusText = ResourceLoader.GetString("Generation_BackendStarting");
     bool _isGenerating;
     bool _isBackendReady;
     BitmapImage? _resultImage;
@@ -137,12 +140,12 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
                 DeviceInfo = $"{health.Device} / {health.LoadedModel}";
                 IsBackendReady = true;
-                StatusText = "Ready";
+                StatusText = ResourceLoader.GetString("Generation_Ready");
             });
         }
         catch (Exception ex)
         {
-            _dispatcherQueue.TryEnqueue(() => StatusText = $"Error: {ex.Message}");
+            _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), ex.Message));
         }
     }
 
@@ -155,12 +158,12 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
         if (!TryParseSeed(SeedText, out long? seed))
         {
-            StatusText = "Seed must be an integer.";
+            StatusText = ResourceLoader.GetString("Generation_SeedMustBeInteger");
             return;
         }
 
         IsGenerating = true;
-        StatusText = "Generating...";
+        StatusText = ResourceLoader.GetString("Generation_Generating");
 
         try
         {
@@ -178,13 +181,13 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
             if (result.Error is not null)
             {
-                _dispatcherQueue.TryEnqueue(() => StatusText = $"Error: {result.Error}");
+                _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), result.Error));
                 return;
             }
 
             if (result.ImageUrl is not string imageUrl)
             {
-                _dispatcherQueue.TryEnqueue(() => StatusText = "No image returned.");
+                _dispatcherQueue.TryEnqueue(() => StatusText = ResourceLoader.GetString("Generation_NoImageReturned"));
                 return;
             }
 
@@ -199,12 +202,12 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                 BitmapImage bitmap = new();
                 await bitmap.SetSourceAsync(stream);
                 ResultImage = bitmap;
-                StatusText = "Done";
+                StatusText = ResourceLoader.GetString("Generation_Done");
             });
         }
         catch (Exception ex)
         {
-            _dispatcherQueue.TryEnqueue(() => StatusText = $"Error: {ex.Message}");
+            _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), ex.Message));
         }
         finally
         {

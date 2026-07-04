@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using SDApp.Services;
 using SDApp.Views;
 
@@ -7,6 +8,8 @@ namespace SDApp;
 
 public sealed partial class MainWindow : Window
 {
+    static readonly ResourceLoader ResourceLoader = new();
+
     readonly BackendProcessManager _backendProcessManager = new(BackendProjectPath);
     BackendApiClient? _apiClient;
 
@@ -17,6 +20,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
 
+        Title = ResourceLoader.GetString("MainWindow_Title");
         AppWindow.SetIcon("Assets/AppIcon.ico");
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarGrid);
@@ -53,7 +57,7 @@ public sealed partial class MainWindow : Window
             DispatcherQueue.TryEnqueue(() =>
                 RootFrame.Content = new TextBlock
                 {
-                    Text = $"Backend failed to start: {ex.Message}",
+                    Text = string.Format(ResourceLoader.GetString("MainWindow_BackendFailedToStart"), ex.Message),
                     Margin = new Thickness(20),
                 });
         }

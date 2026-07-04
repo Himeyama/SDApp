@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using SDApp.Services;
 using SDApp.ViewModels;
 
@@ -10,6 +11,8 @@ namespace SDApp.Views;
 public sealed partial class GenerationPage : Page
 {
     const string BrailleSpinnerFrames = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
+
+    static readonly ResourceLoader ResourceLoader = new();
 
     readonly DispatcherQueueTimer _backendStartingSpinnerTimer;
     readonly GenerationViewModel _viewModel;
@@ -29,12 +32,13 @@ public sealed partial class GenerationPage : Page
 
         GenerateButton.IsEnabled = false;
 
+        string backendStartingText = ResourceLoader.GetString("Generation_BackendStarting");
         _backendStartingSpinnerTimer = DispatcherQueue.CreateTimer();
         _backendStartingSpinnerTimer.Interval = TimeSpan.FromMilliseconds(80);
         _backendStartingSpinnerTimer.Tick += (_, _) =>
         {
             _backendStartingSpinnerIndex = (_backendStartingSpinnerIndex + 1) % BrailleSpinnerFrames.Length;
-            GenerateButton.Content = $"{BrailleSpinnerFrames[_backendStartingSpinnerIndex]} Backend starting...";
+            GenerateButton.Content = $"{BrailleSpinnerFrames[_backendStartingSpinnerIndex]} {backendStartingText}";
         };
         _backendStartingSpinnerTimer.Start();
     }
@@ -63,7 +67,7 @@ public sealed partial class GenerationPage : Page
                 if (_viewModel.IsBackendReady)
                 {
                     _backendStartingSpinnerTimer.Stop();
-                    GenerateButton.Content = "Generate";
+                    GenerateButton.Content = ResourceLoader.GetString("Generation_GenerateButtonLabel");
                 }
 
                 GenerateButton.IsEnabled = _viewModel.IsBackendReady && !_viewModel.IsGenerating;
