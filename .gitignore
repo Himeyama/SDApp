@@ -23,4 +23,5 @@ Thumbs.db
 # Local instructions (not for repo)
 CLAUDE.md
 output/*.png
+outputs/*.png
 docs/stable-diffusion-webui-setup-notes.md

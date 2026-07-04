@@ -50,6 +50,8 @@ public sealed partial class MainWindow : Window
                 {
                     generationPage.AttachBackend(_apiClient);
                 }
+
+                ModelSelectionButton.IsEnabled = true;
             });
         }
         catch (Exception ex)
@@ -60,6 +62,22 @@ public sealed partial class MainWindow : Window
                     Text = string.Format(ResourceLoader.GetString("MainWindow_BackendFailedToStart"), ex.Message),
                     Margin = new Thickness(20),
                 });
+        }
+    }
+
+    async void ModelSelectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_apiClient is not BackendApiClient apiClient)
+        {
+            return;
+        }
+
+        ModelSelectionDialog dialog = new(apiClient) { XamlRoot = Content.XamlRoot };
+        await dialog.ShowAsync();
+
+        if (dialog.SelectedModelId is not null && RootFrame.Content is GenerationPage generationPage)
+        {
+            await generationPage.RefreshDeviceInfoAsync(apiClient);
         }
     }
 

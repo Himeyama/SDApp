@@ -1,7 +1,7 @@
 """Loads and holds the active diffusers pipeline for inference."""
 
 import torch
-from diffusers import AutoPipelineForText2Image
+from diffusers import AutoPipelineForText2Image, DiffusionPipeline
 
 from sdapp_backend.inference.samplers import SAMPLER_CLASSES
 from sdapp_backend.schemas.generation import Sampler
@@ -11,10 +11,18 @@ class PipelineManager:
     """Owns a single loaded text-to-image pipeline, moved onto the best available device."""
 
     def __init__(self, model_id: str) -> None:
-        self.model_id = model_id
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model_id = model_id
+        self._pipeline = self._load_pipeline(model_id)
+
+    def load_model(self, model_id: str) -> None:
+        """Replace the currently loaded pipeline with a different model."""
+        self._pipeline = self._load_pipeline(model_id)
+        self.model_id = model_id
+
+    def _load_pipeline(self, model_id: str) -> DiffusionPipeline:
         dtype = torch.float16 if self.device == "cuda" else torch.float32
-        self._pipeline = AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=dtype).to(
+        return AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=dtype).to(
             self.device
         )
 

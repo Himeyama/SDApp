@@ -69,6 +69,22 @@
     <value>バックエンドの起動に失敗しました: {0}</value>
   </data>
 
+  <data name="ModelSelectionDialog.Title" xml:space="preserve">
+    <value>モデルを選択</value>
+  </data>
+  <data name="ModelSelectionDialog.CloseButtonText" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="ModelSelectionDialog_Description.Text" xml:space="preserve">
+    <value>ローカルにダウンロード済みのモデルから選択できます。</value>
+  </data>
+  <data name="ModelSelectionDialog_LoadErrorTitle" xml:space="preserve">
+    <value>モデル一覧の取得に失敗しました</value>
+  </data>
+  <data name="ModelSelectionDialog_SwitchErrorTitle" xml:space="preserve">
+    <value>モデルの切り替えに失敗しました</value>
+  </data>
+
   <data name="Generation_PromptLabel.Text" xml:space="preserve">
     <value>プロンプト</value>
   </data>

@@ -29,8 +29,11 @@
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
-                <TextBlock x:Name="StatusBarDeviceInfoTextBlock" Grid.Column="1"
-                           Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />
+                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="1"
+                                 Padding="0" IsEnabled="False" Click="ModelSelectionButton_Click">
+                    <TextBlock x:Name="StatusBarDeviceInfoTextBlock"
+                               Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />
+                </HyperlinkButton>
             </Grid>
         </Border>
     </Grid>

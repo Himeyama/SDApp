@@ -53,6 +53,9 @@ public sealed partial class GenerationPage : Page
     internal void AttachBackend(BackendApiClient apiClient) =>
         _ = _viewModel.AttachBackendAsync(apiClient, CancellationToken.None);
 
+    internal Task RefreshDeviceInfoAsync(BackendApiClient apiClient) =>
+        _viewModel.RefreshDeviceInfoAsync(apiClient, CancellationToken.None);
+
     void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)

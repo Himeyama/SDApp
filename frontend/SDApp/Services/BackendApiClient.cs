@@ -48,6 +48,27 @@ sealed class BackendApiClient(int port) : IDisposable
         return new HealthInfo(dto.Status, dto.Device, dto.LoadedModel);
     }
 
+    public async Task<List<ModelInfo>> GetModelsAsync(CancellationToken ct)
+    {
+        List<ModelDto>? dtos = await _http.GetFromJsonAsync<List<ModelDto>>("/api/v1/models", ct).ConfigureAwait(false);
+        return dtos?.Select(dto => new ModelInfo(dto.ModelId, dto.IsActive, dto.SizeOnDiskBytes)).ToList() ?? [];
+    }
+
+    public async Task<ModelInfo> SetActiveModelAsync(string modelId, CancellationToken ct)
+    {
+        HttpResponseMessage response = await _http
+            .PostAsJsonAsync("/api/v1/models/active", new SetActiveModelBody(modelId), ct)
+            .ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        ModelDto dto = await response.Content
+            .ReadFromJsonAsync<ModelDto>(ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Empty response from backend.");
+
+        return new ModelInfo(dto.ModelId, dto.IsActive, dto.SizeOnDiskBytes);
+    }
+
     public void Dispose() => _http.Dispose();
 
     sealed record TextToImageBody(
@@ -70,6 +91,13 @@ sealed class BackendApiClient(int port) : IDisposable
         string Status,
         string Device,
         [property: JsonPropertyName("loaded_model")] string LoadedModel);
+
+    sealed record ModelDto(
+        [property: JsonPropertyName("model_id")] string ModelId,
+        [property: JsonPropertyName("is_active")] bool IsActive,
+        [property: JsonPropertyName("size_on_disk_bytes")] long SizeOnDiskBytes);
+
+    sealed record SetActiveModelBody([property: JsonPropertyName("model_id")] string ModelId);
 }
 
 sealed record HealthInfo(string Status, string Device, string LoadedModel);

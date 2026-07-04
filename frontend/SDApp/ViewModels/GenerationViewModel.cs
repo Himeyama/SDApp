@@ -149,6 +149,12 @@ sealed class GenerationViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task RefreshDeviceInfoAsync(BackendApiClient apiClient, CancellationToken ct)
+    {
+        HealthInfo health = await apiClient.GetHealthAsync(ct).ConfigureAwait(false);
+        _dispatcherQueue.TryEnqueue(() => DeviceInfo = $"{health.Device} / {health.LoadedModel}");
+    }
+
     public async Task GenerateAsync(CancellationToken ct)
     {
         if (_apiClient is not BackendApiClient apiClient || string.IsNullOrWhiteSpace(Prompt) || IsGenerating)

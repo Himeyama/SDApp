@@ -28,3 +28,13 @@ class GenerationJob(BaseModel):
     total_steps: int = 0
     image_url: str | None = None
     error: str | None = None
+
+
+class ModelInfo(BaseModel):
+    model_id: str
+    is_active: bool
+    size_on_disk_bytes: int
+
+
+class SetActiveModelRequest(BaseModel):
+    model_id: str
