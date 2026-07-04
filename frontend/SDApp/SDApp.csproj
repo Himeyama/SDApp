@@ -34,4 +34,20 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
   </ItemGroup>
+
+  <!--
+    dotnet publish (アンパッケージ配布) は WinUI3 に必須の SDApp.pri と .xbf
+    (コンパイル済み XAML) を publish 出力にコピーしない既知の不具合がある。
+    これらが欠けると起動時に Microsoft.UI.Xaml.dll 内で 0xc000027b で即クラッシュする。
+    build 済み出力ディレクトリ ($(OutDir)) からこれらを publish 出力へ明示的にコピーして補う。
+  -->
+  <Target Name="CopyWinUIResourcesToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <_WinUIPublishResource Include="$(OutDir)$(AssemblyName).pri" />
+      <_WinUIPublishResource Include="$(OutDir)**\*.xbf" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_WinUIPublishResource)"
+          DestinationFiles="@(_WinUIPublishResource->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

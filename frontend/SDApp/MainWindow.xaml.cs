@@ -36,15 +36,20 @@ public sealed partial class MainWindow : Window
 
     async Task StartBackendAsync()
     {
+        // UI スレッドで生成するので、Report は自動的に UI スレッドへマーシャルされる。
+        Progress<string> setupProgress = new(ReportEnvironmentSetup);
+
         try
         {
             int port = await _backendProcessManager
-                .StartAsync(AppSettings.LastModelId, onSettingUp: NotifyEnvironmentSetup)
+                .StartAsync(AppSettings.LastModelId, onSetupProgress: setupProgress)
                 .ConfigureAwait(false);
             _apiClient = new BackendApiClient(port);
 
             DispatcherQueue.TryEnqueue(() =>
             {
+                SetupOverlay.Visibility = Visibility.Collapsed;
+
                 if (RootFrame.Content is GenerationPage generationPage)
                 {
                     generationPage.AttachBackend(_apiClient);
@@ -64,19 +69,29 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    // 初回セットアップ(uv sync)開始時に呼ばれる。ステータスバーに進捗を表示する。
-    void NotifyEnvironmentSetup() =>
-        DispatcherQueue.TryEnqueue(() =>
-            StatusBarTextBlock.Text = ResourceLoader.GetString("MainWindow_SettingUpEnvironment"));
+    // 初回セットアップ(uv sync)中に呼ばれる。開始合図(空文字)でオーバーレイを表示し、
+    // 以降は uv sync のログ行を実況表示する。Progress<string> 経由なので UI スレッドで呼ばれる。
+    void ReportEnvironmentSetup(string logLine)
+    {
+        SetupOverlay.Visibility = Visibility.Visible;
+
+        if (!string.IsNullOrEmpty(logLine))
+        {
+            SetupLogTextBlock.Text = logLine;
+        }
+    }
 
     void ShowBackendStartupError(string message) =>
         DispatcherQueue.TryEnqueue(() =>
+        {
+            SetupOverlay.Visibility = Visibility.Collapsed;
             RootFrame.Content = new TextBlock
             {
                 Text = message,
                 Margin = new Thickness(20),
                 TextWrapping = TextWrapping.Wrap,
-            });
+            };
+        });
 
     async void ModelSelectionButton_Click(object sender, RoutedEventArgs e)
     {

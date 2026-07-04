@@ -29,8 +29,11 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
     /// 必要であれば <c>uv sync</c> を実行する。既にセットアップ済み(マーカーが現在の uv.lock と一致)
     /// なら何もしない。uv が見つからない場合は <see cref="UvNotFoundException"/> を投げる(マーカーは書かない)。
     /// </summary>
-    /// <param name="onSettingUp">実際に uv sync を開始する直前に一度だけ呼ばれる(スキップ時は呼ばれない)。</param>
-    public async Task EnsureAsync(Action? onSettingUp = null, CancellationToken ct = default)
+    /// <param name="onProgress">
+    /// 実際に uv sync を開始する直前に空文字で一度、その後 uv sync のログ行が出るたびに呼ばれる
+    /// (スキップ時は一度も呼ばれない)。UI に進捗を実況表示するために使う。
+    /// </param>
+    public async Task EnsureAsync(IProgress<string>? onProgress = null, CancellationToken ct = default)
     {
         string currentLockHash = ComputeLockHash();
 
@@ -39,9 +42,10 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
             return;
         }
 
-        onSettingUp?.Invoke();
+        // セットアップ開始の合図(まだログ行が無いので空文字)。UI 側でオーバーレイを表示する契機になる。
+        onProgress?.Report(string.Empty);
 
-        await RunUvSyncAsync(ct).ConfigureAwait(false);
+        await RunUvSyncAsync(onProgress, ct).ConfigureAwait(false);
 
         // uv sync が終了コード 0 で完了した場合のみここに到達する。マーカーを書いて完了を記録する。
         WriteMarker(currentLockHash);
@@ -74,7 +78,7 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
         }
     }
 
-    async Task RunUvSyncAsync(CancellationToken ct)
+    async Task RunUvSyncAsync(IProgress<string>? onProgress, CancellationToken ct)
     {
         ProcessStartInfo startInfo = new()
         {
@@ -87,6 +91,21 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
 
         // 起動時の環境と揃える。hf_xet 経由のダウンロードはこの環境でハングすることがあるため無効化する。
         startInfo.Environment["HF_HUB_DISABLE_XET"] = "1";
+
+        // インストール構成では仮想環境を書き込み権限のあるユーザー領域に作る(インストール先の
+        // Program Files は書き込み不可)。開発構成では null なので設定せず backend\.venv を使う。
+        // uv run 側 (BackendProcessManager) と必ず同じ場所を指すこと。
+        if (BackendLocator.VenvPath is string venvPath)
+        {
+            startInfo.Environment["UV_PROJECT_ENVIRONMENT"] = venvPath;
+
+            // uv が .venv を作れるよう親ディレクトリ (%LOCALAPPDATA%\SDApp) を先に用意しておく。
+            string? venvParent = Path.GetDirectoryName(venvPath);
+            if (venvParent is not null)
+            {
+                Directory.CreateDirectory(venvParent);
+            }
+        }
 
         startInfo.ArgumentList.Add("sync");
         startInfo.ArgumentList.Add("--project");
@@ -107,8 +126,17 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
         {
             // uv/pip は大量に stdout/stderr へ出力する。読み出さないと OS のパイプバッファが埋まって
             // uv 側の書き込みがブロックし、uv sync が永久に終わらなくなる(BackendProcessManager と同じ理由)。
-            process.OutputDataReceived += DiscardProcessOutput;
-            process.ErrorDataReceived += DiscardProcessOutput;
+            // 読み出した行は onProgress へ転送して UI に実況表示する(uv の進捗はほとんど stderr に出る)。
+            void ForwardLine(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data is not null)
+                {
+                    onProgress?.Report(e.Data);
+                }
+            }
+
+            process.OutputDataReceived += ForwardLine;
+            process.ErrorDataReceived += ForwardLine;
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
@@ -144,10 +172,5 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
         }
 
         File.WriteAllText(MarkerFilePath, lockHash);
-    }
-
-    // リダイレクトしたパイプを空にし続けるためだけのハンドラ。ログ内容は破棄する。
-    static void DiscardProcessOutput(object sender, DataReceivedEventArgs e)
-    {
     }
 }

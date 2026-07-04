@@ -24,6 +24,23 @@
 
         <Frame x:Name="RootFrame" Grid.Row="1" />
 
+        <Border x:Name="SetupOverlay" Grid.Row="1" Visibility="Collapsed"
+                Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        MaxWidth="560" Spacing="16" Padding="24">
+                <ProgressRing IsActive="True" Width="48" Height="48"
+                              HorizontalAlignment="Center" />
+                <TextBlock x:Uid="SetupOverlay_Title" HorizontalAlignment="Center"
+                           Style="{ThemeResource SubtitleTextBlockStyle}" />
+                <TextBlock x:Uid="SetupOverlay_Description" HorizontalAlignment="Center"
+                           Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"
+                           TextAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock x:Name="SetupLogTextBlock" HorizontalAlignment="Center"
+                           Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5"
+                           FontFamily="Consolas" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Border>
+
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
             <Grid ColumnDefinitions="*,Auto">

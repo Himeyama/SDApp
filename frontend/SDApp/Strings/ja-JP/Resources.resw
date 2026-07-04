@@ -68,8 +68,11 @@
   <data name="MainWindow_BackendFailedToStart" xml:space="preserve">
     <value>バックエンドの起動に失敗しました: {0}</value>
   </data>
-  <data name="MainWindow_SettingUpEnvironment" xml:space="preserve">
-    <value>初回セットアップ中... (依存パッケージをダウンロード・インストールしています。数分〜数十分かかることがあります)</value>
+  <data name="SetupOverlay_Title.Text" xml:space="preserve">
+    <value>初回セットアップ中...</value>
+  </data>
+  <data name="SetupOverlay_Description.Text" xml:space="preserve">
+    <value>Python の依存パッケージをダウンロード・インストールしています。数分〜数十分かかることがあります。</value>
   </data>
   <data name="MainWindow_UvNotFound" xml:space="preserve">
     <value>uv が見つかりませんでした。SDApp のバックエンドには uv が必要です。https://docs.astral.sh/uv/ からインストールしてから、アプリを再起動してください。</value>

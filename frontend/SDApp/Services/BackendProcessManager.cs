@@ -22,18 +22,18 @@ sealed class BackendProcessManager : IAsyncDisposable
         _environmentSetup = new BackendEnvironmentSetup(backendProjectPath);
     }
 
-    /// <param name="onSettingUp">
-    /// 初回セットアップ(uv sync)を実際に開始する直前に一度呼ばれる。UI に進捗を表示するために使う。
-    /// セットアップ済みでスキップする場合は呼ばれない。
+    /// <param name="onSetupProgress">
+    /// 初回セットアップ(uv sync)開始直前に空文字で一度、その後 uv sync のログ行が出るたびに呼ばれる。
+    /// UI に進捗を実況表示するために使う。セットアップ済みでスキップする場合は一度も呼ばれない。
     /// </param>
     public async Task<int> StartAsync(
         string? modelId = null,
-        Action? onSettingUp = null,
+        IProgress<string>? onSetupProgress = null,
         CancellationToken ct = default)
     {
         // uv run の前に、Python 仮想環境が用意済みであることを保証する。未セットアップ or 前回失敗なら
         // ここで uv sync を実行する(成功時のみマーカーが書かれ、失敗時は次回起動で再試行される)。
-        await _environmentSetup.EnsureAsync(onSettingUp, ct).ConfigureAwait(false);
+        await _environmentSetup.EnsureAsync(onSetupProgress, ct).ConfigureAwait(false);
 
         Port = FindFreePort();
 
@@ -49,6 +49,14 @@ sealed class BackendProcessManager : IAsyncDisposable
         // hf_xet 経由のダウンロードはこの環境でハングすることがあり、モデル切り替え時の
         // from_pretrained がそのまま返らなくなる。通常の HTTP ダウンロードに固定する。
         startInfo.Environment["HF_HUB_DISABLE_XET"] = "1";
+
+        // uv sync (BackendEnvironmentSetup) が作った仮想環境を使う。同じ場所を指さないと
+        // uv run が別の .venv を作り直そうとして起動が壊れるため、必ず一致させること
+        // (開発構成では null なので設定せず backend\.venv を使う)。
+        if (BackendLocator.VenvPath is string venvPath)
+        {
+            startInfo.Environment["UV_PROJECT_ENVIRONMENT"] = venvPath;
+        }
 
         startInfo.ArgumentList.Add("run");
         startInfo.ArgumentList.Add("--project");

@@ -97,7 +97,7 @@ SectionEnd
 ; アンインストール
 ;--------------------------------
 Section "Uninstall"
-  ; インストール先を丸ごと削除する。backend\.venv もここに含まれるため一緒に消える。
+  ; インストール先を丸ごと削除する。
   RMDir /r "$INSTDIR\app"
   RMDir /r "$INSTDIR\backend"
   Delete "$INSTDIR\Uninstall.exe"
@@ -109,7 +109,8 @@ Section "Uninstall"
 
   DeleteRegKey HKLM "${UNINSTALL_KEY}"
 
-  ; %LOCALAPPDATA%\SDApp (設定・.venv-ready マーカー・生成画像・HFキャッシュ等) は
-  ; あえて残す。再インストール時に数GB規模の再ダウンロードを避けるため。
-  ; 完全に消したいユーザーは手動で %LOCALAPPDATA%\SDApp を削除する。
+  ; アプリ情報をすべて消去する。%LOCALAPPDATA%\SDApp には仮想環境 (.venv)・.venv-ready
+  ; マーカー・設定・生成画像・HF キャッシュが入っており、アンインストールでこれらも消す。
+  ; (数 GB になり得るが、残さずクリーンに削除する方針)
+  RMDir /r "$LOCALAPPDATA\${PRODUCT_NAME}"
 SectionEnd

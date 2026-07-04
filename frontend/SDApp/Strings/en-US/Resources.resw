@@ -68,8 +68,11 @@
   <data name="MainWindow_BackendFailedToStart" xml:space="preserve">
     <value>Backend failed to start: {0}</value>
   </data>
-  <data name="MainWindow_SettingUpEnvironment" xml:space="preserve">
-    <value>First-time setup in progress... (downloading and installing dependencies; this may take several minutes)</value>
+  <data name="SetupOverlay_Title.Text" xml:space="preserve">
+    <value>First-time setup in progress...</value>
+  </data>
+  <data name="SetupOverlay_Description.Text" xml:space="preserve">
+    <value>Downloading and installing Python dependencies. This can take several minutes to tens of minutes.</value>
   </data>
   <data name="MainWindow_UvNotFound" xml:space="preserve">
     <value>uv was not found. The SDApp backend requires uv. Please install it from https://docs.astral.sh/uv/ and then restart the app.</value>
