@@ -77,7 +77,17 @@ public sealed partial class GenerationPage : Page
                 break;
             case nameof(GenerationViewModel.IsGenerating):
                 GenerateButton.IsEnabled = _viewModel.IsBackendReady && !_viewModel.IsGenerating;
-                GenerationProgressRing.IsActive = _viewModel.IsGenerating;
+                ResultImageControl.Visibility = _viewModel.IsGenerating ? Visibility.Collapsed : Visibility.Visible;
+                SkeletonScreenGrid.Visibility = _viewModel.IsGenerating ? Visibility.Visible : Visibility.Collapsed;
+                if (_viewModel.IsGenerating)
+                {
+                    SkeletonShimmerStoryboard.Begin();
+                }
+                else
+                {
+                    SkeletonShimmerStoryboard.Stop();
+                }
+
                 break;
             case nameof(GenerationViewModel.Samplers):
                 SamplerComboBox.ItemsSource = _viewModel.Samplers;
@@ -121,5 +131,13 @@ public sealed partial class GenerationPage : Page
         {
             CfgScaleValueTextBlock.Text = e.NewValue.ToString("F1");
         }
+    }
+
+    void SkeletonScreenGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        SkeletonClipGeometry.Rect = new Windows.Foundation.Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
+        SkeletonShimmerTransform.X = -SkeletonShimmerRectangle.Width;
+        SkeletonShimmerAnimation.From = -SkeletonShimmerRectangle.Width;
+        SkeletonShimmerAnimation.To = e.NewSize.Width + SkeletonShimmerRectangle.Width;
     }
 }

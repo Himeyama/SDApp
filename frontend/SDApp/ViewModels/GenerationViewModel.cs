@@ -21,8 +21,8 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     string _negativePrompt = "";
     int _steps = 20;
     double _cfgScale = 7.0;
-    int _width = 512;
-    int _height = 512;
+    int _width = 1024;
+    int _height = 1024;
     string _sampler = "euler_a";
     string _seedText = "";
     string _statusText = ResourceLoader.GetString("Generation_BackendStarting");

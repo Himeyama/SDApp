@@ -47,13 +47,13 @@
                     <StackPanel Grid.Column="0" Spacing="4">
                         <TextBlock x:Uid="Generation_WidthLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <NumberBox x:Name="WidthNumberBox" Minimum="64" Maximum="2048"
-                                   SmallChange="8" LargeChange="64" Value="512"
+                                   SmallChange="8" LargeChange="64" Value="1024"
                                    SpinButtonPlacementMode="Compact" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="4">
                         <TextBlock x:Uid="Generation_HeightLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <NumberBox x:Name="HeightNumberBox" Minimum="64" Maximum="2048"
-                                   SmallChange="8" LargeChange="64" Value="512"
+                                   SmallChange="8" LargeChange="64" Value="1024"
                                    SpinButtonPlacementMode="Compact" />
                     </StackPanel>
                 </Grid>
@@ -68,8 +68,38 @@
                     CornerRadius="8">
                 <Grid>
                     <Image x:Name="ResultImageControl" Stretch="Uniform" Margin="8" />
-                    <ProgressRing x:Name="GenerationProgressRing" IsActive="False"
-                                  Width="48" Height="48" />
+
+                    <Grid x:Name="SkeletonScreenGrid" Visibility="Collapsed" CornerRadius="8"
+                          Background="{ThemeResource ControlFillColorDefaultBrush}"
+                          SizeChanged="SkeletonScreenGrid_SizeChanged">
+                        <Grid.Clip>
+                            <RectangleGeometry x:Name="SkeletonClipGeometry" />
+                        </Grid.Clip>
+                        <Rectangle x:Name="SkeletonShimmerRectangle" Width="200">
+                            <Rectangle.RenderTransform>
+                                <TranslateTransform x:Name="SkeletonShimmerTransform" X="-200" />
+                            </Rectangle.RenderTransform>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Offset="0.0" Color="Transparent" />
+                                    <GradientStop Offset="0.5" Color="{ThemeResource ControlFillColorSecondary}" />
+                                    <GradientStop Offset="1.0" Color="Transparent" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Grid.Resources>
+                            <Storyboard x:Name="SkeletonShimmerStoryboard" RepeatBehavior="Forever">
+                                <DoubleAnimation x:Name="SkeletonShimmerAnimation"
+                                                  Storyboard.TargetName="SkeletonShimmerTransform"
+                                                  Storyboard.TargetProperty="X"
+                                                  Duration="0:0:1.2">
+                                    <DoubleAnimation.EasingFunction>
+                                        <SineEase EasingMode="EaseInOut" />
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </Grid.Resources>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
