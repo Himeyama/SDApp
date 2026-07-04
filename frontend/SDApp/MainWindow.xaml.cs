@@ -41,7 +41,7 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            int port = await _backendProcessManager.StartAsync().ConfigureAwait(false);
+            int port = await _backendProcessManager.StartAsync(AppSettings.LastModelId).ConfigureAwait(false);
             _apiClient = new BackendApiClient(port);
 
             DispatcherQueue.TryEnqueue(() =>

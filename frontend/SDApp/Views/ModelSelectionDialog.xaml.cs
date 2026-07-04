@@ -71,6 +71,7 @@ sealed partial class ModelSelectionDialog : ContentDialog
         {
             ModelInfo result = await _apiClient.SetActiveModelAsync(item.ModelId, CancellationToken.None).ConfigureAwait(true);
             SelectedModelId = result.ModelId;
+            AppSettings.LastModelId = result.ModelId;
             Hide();
         }
         catch (Exception ex)

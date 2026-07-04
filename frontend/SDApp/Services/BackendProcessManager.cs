@@ -17,19 +17,31 @@ sealed class BackendProcessManager : IAsyncDisposable
 
     public BackendProcessManager(string backendProjectPath) => _backendProjectPath = backendProjectPath;
 
-    public async Task<int> StartAsync(CancellationToken ct = default)
+    public async Task<int> StartAsync(string? modelId = null, CancellationToken ct = default)
     {
         Port = FindFreePort();
 
         ProcessStartInfo startInfo = new()
         {
             FileName = "uv",
-            Arguments = $"run --project \"{_backendProjectPath}\" sdapp-backend --port {Port}",
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
         };
+
+        startInfo.ArgumentList.Add("run");
+        startInfo.ArgumentList.Add("--project");
+        startInfo.ArgumentList.Add(_backendProjectPath);
+        startInfo.ArgumentList.Add("sdapp-backend");
+        startInfo.ArgumentList.Add("--port");
+        startInfo.ArgumentList.Add(Port.ToString());
+
+        if (!string.IsNullOrEmpty(modelId))
+        {
+            startInfo.ArgumentList.Add("--model-id");
+            startInfo.ArgumentList.Add(modelId);
+        }
 
         _process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start backend process.");
 
