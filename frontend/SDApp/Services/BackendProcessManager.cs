@@ -45,6 +45,16 @@ sealed class BackendProcessManager : IAsyncDisposable
 
         _process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start backend process.");
 
+        // stdout/stderr をリダイレクトした以上、必ず読み出し続けてパイプを空にする。
+        // diffusers/tqdm は推論のたびに数 KB を stderr へ出力するため、読み出さないと
+        // OS のパイプバッファ(数 KB)が数回の生成で満杯になり、python が書き込みで
+        // ブロック → 推論が停止して以降のリクエストが永久に返らなくなる
+        // (「2回目以降の生成が終わらない」の真因)。ログ内容自体は使わないので破棄する。
+        _process.OutputDataReceived += DiscardProcessOutput;
+        _process.ErrorDataReceived += DiscardProcessOutput;
+        _process.BeginOutputReadLine();
+        _process.BeginErrorReadLine();
+
         // このアプリが WinRT の FailFast 等で異常終了しても、OS が確実に
         // uv/python の子プロセスツリーを終了させるよう Job Object に紐付ける。
         _jobObject.Assign(_process.SafeHandle);
@@ -90,6 +100,11 @@ sealed class BackendProcessManager : IAsyncDisposable
         }
 
         throw new TimeoutException("Backend did not become healthy in time.");
+    }
+
+    // リダイレクトしたパイプを空にし続けるためだけのハンドラ。ログ内容は破棄する。
+    static void DiscardProcessOutput(object sender, DataReceivedEventArgs e)
+    {
     }
 
     static int FindFreePort()

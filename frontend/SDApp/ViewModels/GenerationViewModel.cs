@@ -235,8 +235,14 @@ sealed class GenerationViewModel : INotifyPropertyChanged
         }
         finally
         {
-            _generatingElapsedTimer.Stop();
-            _dispatcherQueue.TryEnqueue(() => IsGenerating = false);
+            // ConfigureAwait(false) 後はスレッドプール上で実行され得るため、経過時間タイマーを
+            // 所有する UI スレッド上でまとめて停止・状態解除する。
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                _generatingElapsedTimer.Stop();
+                _generatingStopwatch.Stop();
+                IsGenerating = false;
+            });
         }
     }
 
