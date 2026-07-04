@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Dispatching;
@@ -15,8 +16,10 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     static readonly ResourceLoader ResourceLoader = new();
 
     readonly DispatcherQueue _dispatcherQueue;
+    readonly DispatcherQueueTimer _generatingElapsedTimer;
 
     BackendApiClient? _apiClient;
+    Stopwatch _generatingStopwatch = new();
     string _prompt = "";
     string _negativePrompt = "";
     int _steps = 20;
@@ -32,7 +35,15 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     List<string> _samplers = [];
     string _deviceInfo = "";
 
-    public GenerationViewModel(DispatcherQueue dispatcherQueue) => _dispatcherQueue = dispatcherQueue;
+    public GenerationViewModel(DispatcherQueue dispatcherQueue)
+    {
+        _dispatcherQueue = dispatcherQueue;
+
+        _generatingElapsedTimer = dispatcherQueue.CreateTimer();
+        _generatingElapsedTimer.Interval = TimeSpan.FromMilliseconds(100);
+        _generatingElapsedTimer.Tick += (_, _) =>
+            StatusText = string.Format(ResourceLoader.GetString("Generation_Generating"), _generatingStopwatch.Elapsed.TotalSeconds);
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -172,7 +183,9 @@ sealed class GenerationViewModel : INotifyPropertyChanged
         }
 
         IsGenerating = true;
-        StatusText = ResourceLoader.GetString("Generation_Generating");
+        _generatingStopwatch = Stopwatch.StartNew();
+        StatusText = string.Format(ResourceLoader.GetString("Generation_Generating"), 0.0);
+        _generatingElapsedTimer.Start();
 
         try
         {
@@ -202,6 +215,8 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
             byte[] imageBytes = await apiClient.DownloadImageAsync(imageUrl, ct).ConfigureAwait(false);
 
+            double elapsedSeconds = _generatingStopwatch.Elapsed.TotalSeconds;
+
             _dispatcherQueue.TryEnqueue(async void () =>
             {
                 InMemoryRandomAccessStream stream = new();
@@ -211,7 +226,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                 BitmapImage bitmap = new();
                 await bitmap.SetSourceAsync(stream);
                 ResultImage = bitmap;
-                StatusText = ResourceLoader.GetString("Generation_Done");
+                StatusText = string.Format(ResourceLoader.GetString("Generation_Done"), elapsedSeconds);
             });
         }
         catch (Exception ex)
@@ -220,6 +235,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
         }
         finally
         {
+            _generatingElapsedTimer.Stop();
             _dispatcherQueue.TryEnqueue(() => IsGenerating = false);
         }
     }

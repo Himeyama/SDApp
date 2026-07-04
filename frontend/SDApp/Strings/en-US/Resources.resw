@@ -140,12 +140,12 @@
     <value>Seed must be an integer.</value>
   </data>
   <data name="Generation_Generating" xml:space="preserve">
-    <value>Generating...</value>
+    <value>Generating... ({0:F1}s)</value>
   </data>
   <data name="Generation_NoImageReturned" xml:space="preserve">
     <value>No image returned.</value>
   </data>
   <data name="Generation_Done" xml:space="preserve">
-    <value>Done</value>
+    <value>Done ({0:F1}s)</value>
   </data>
 </root>

@@ -140,12 +140,12 @@
     <value>シード値は整数で入力してください。</value>
   </data>
   <data name="Generation_Generating" xml:space="preserve">
-    <value>生成中...</value>
+    <value>生成中... ({0:F1}秒)</value>
   </data>
   <data name="Generation_NoImageReturned" xml:space="preserve">
     <value>画像が返されませんでした。</value>
   </data>
   <data name="Generation_Done" xml:space="preserve">
-    <value>完了</value>
+    <value>完了 ({0:F1}秒)</value>
   </data>
 </root>
