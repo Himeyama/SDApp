@@ -1,5 +1,6 @@
 """Loads and holds the active diffusers pipeline for inference."""
 
+import gc
 from pathlib import Path
 
 import torch
@@ -23,9 +24,23 @@ class PipelineManager:
         self._pipeline = self._load_pipeline(model_id)
 
     def load_model(self, model_id: str) -> None:
-        """Replace the currently loaded pipeline with a different model."""
-        self._pipeline = self._load_pipeline(model_id)
+        """Replace the currently loaded pipeline with a different model.
+
+        The new pipeline is loaded before the old one is dropped, so a failed load
+        leaves the previously active model intact. The old pipeline is then released
+        explicitly to free the device memory it held, which on CUDA would otherwise
+        stay reserved and make the next load run out of VRAM.
+        """
+        new_pipeline = self._load_pipeline(model_id)
+
+        old_pipeline = self._pipeline
+        self._pipeline = new_pipeline
         self.model_id = model_id
+
+        del old_pipeline
+        gc.collect()
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
 
     def _load_pipeline(self, model_id: str) -> DiffusionPipeline:
         dtype = torch.float16 if self.device == "cuda" else torch.float32

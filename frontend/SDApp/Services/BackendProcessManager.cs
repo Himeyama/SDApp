@@ -30,6 +30,10 @@ sealed class BackendProcessManager : IAsyncDisposable
             RedirectStandardError = true,
         };
 
+        // hf_xet 経由のダウンロードはこの環境でハングすることがあり、モデル切り替え時の
+        // from_pretrained がそのまま返らなくなる。通常の HTTP ダウンロードに固定する。
+        startInfo.Environment["HF_HUB_DISABLE_XET"] = "1";
+
         startInfo.ArgumentList.Add("run");
         startInfo.ArgumentList.Add("--project");
         startInfo.ArgumentList.Add(_backendProjectPath);
