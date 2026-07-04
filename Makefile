@@ -22,7 +22,7 @@ FRONTEND_SOURCES := $(wildcard $(FRONTEND_DIR)/*.cs) \
 	$(wildcard $(FRONTEND_DIR)/Services/*.cs) \
 	$(wildcard $(FRONTEND_DIR)/Models/*.cs)
 
-.PHONY: all run backend frontend clean
+.PHONY: all run backend frontend installer clean
 
 all: backend frontend
 
@@ -47,7 +47,14 @@ run: all
 	@echo ==^> Launching SDApp
 	$(subst /,\,$(FRONTEND_EXE))
 
+# 配布用インストーラー (NSIS) をビルドする。要 NSIS (makensis) と pwsh (PowerShell 7+)。
+installer:
+	@echo ==^> Building installer
+	pwsh -ExecutionPolicy Bypass -File installer\build-installer.ps1
+
 clean:
 	if exist $(subst /,\,$(BACKEND_SYNC_STAMP)) del /q $(subst /,\,$(BACKEND_SYNC_STAMP))
 	if exist $(subst /,\,$(FRONTEND_DIR))\bin rmdir /s /q $(subst /,\,$(FRONTEND_DIR))\bin
 	if exist $(subst /,\,$(FRONTEND_DIR))\obj rmdir /s /q $(subst /,\,$(FRONTEND_DIR))\obj
+	if exist installer\staging rmdir /s /q installer\staging
+	if exist installer\dist rmdir /s /q installer\dist

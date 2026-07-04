@@ -84,6 +84,38 @@ cd frontend/SDApp
 dotnet build -c Debug
 ```
 
+## 配布 (インストーラー)
+
+エンドユーザー向けに NSIS 製インストーラー (`SDApp-Setup-<version>.exe`) を生成できる。
+
+### 前提条件
+
+- **ビルド側**: .NET 9 SDK, [NSIS](https://nsis.sourceforge.io/) (`makensis`)
+- **エンドユーザー側**: [uv](https://docs.astral.sh/uv/) がインストール済みであること。
+  Python 3.13 は uv が初回セットアップ時に自動取得するため、別途の Python インストールは不要。
+
+### インストーラーのビルド
+
+```powershell
+# ルートで実行 (publish → backend ステージング → NSIS コンパイルを一括)
+./installer/build-installer.ps1 -Version 1.0.0
+# または
+make installer
+```
+
+`installer/dist/SDApp-Setup-<version>.exe` が生成される。
+
+### インストール後の初回起動
+
+インストーラーは `C:\Program Files\SDApp\` に `app\` (フロントエンド) と `backend\`
+(Python ソース) を配置する。`.venv` は同梱されず、**初回起動時にフロントエンドが `uv sync`
+を実行**して仮想環境を作成・依存パッケージをインストールする (torch 等で数GB、数分〜数十分)。
+
+- セットアップの成否は `%LOCALAPPDATA%\SDApp\.venv-ready` に記録される
+  (`uv.lock` のハッシュを保存)。成功した場合のみマーカーが書かれ、失敗した場合は
+  **次回起動時に自動で再セットアップ**が走る。アプリ更新で依存が変わった場合も再同期される。
+- uv が見つからない場合は、アプリ起動時に uv のインストールを促すメッセージが表示される。
+
 ## API概要
 
 バックエンドは独自設計のREST API (`/api/v1/*`) を提供する。

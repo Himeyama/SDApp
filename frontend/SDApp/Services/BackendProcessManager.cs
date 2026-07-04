@@ -10,15 +10,31 @@ sealed class BackendProcessManager : IAsyncDisposable
     static readonly TimeSpan HealthCheckTimeout = TimeSpan.FromSeconds(120);
 
     readonly string _backendProjectPath;
+    readonly BackendEnvironmentSetup _environmentSetup;
     readonly JobObject _jobObject = new();
     Process? _process;
 
     public int Port { get; private set; }
 
-    public BackendProcessManager(string backendProjectPath) => _backendProjectPath = backendProjectPath;
-
-    public async Task<int> StartAsync(string? modelId = null, CancellationToken ct = default)
+    public BackendProcessManager(string backendProjectPath)
     {
+        _backendProjectPath = backendProjectPath;
+        _environmentSetup = new BackendEnvironmentSetup(backendProjectPath);
+    }
+
+    /// <param name="onSettingUp">
+    /// 初回セットアップ(uv sync)を実際に開始する直前に一度呼ばれる。UI に進捗を表示するために使う。
+    /// セットアップ済みでスキップする場合は呼ばれない。
+    /// </param>
+    public async Task<int> StartAsync(
+        string? modelId = null,
+        Action? onSettingUp = null,
+        CancellationToken ct = default)
+    {
+        // uv run の前に、Python 仮想環境が用意済みであることを保証する。未セットアップ or 前回失敗なら
+        // ここで uv sync を実行する(成功時のみマーカーが書かれ、失敗時は次回起動で再試行される)。
+        await _environmentSetup.EnsureAsync(onSettingUp, ct).ConfigureAwait(false);
+
         Port = FindFreePort();
 
         ProcessStartInfo startInfo = new()

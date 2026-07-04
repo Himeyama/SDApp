@@ -14,6 +14,10 @@ frontend/**/obj/
 frontend/**/.vs/
 *.user
 
+# Installer build artifacts
+installer/staging/
+installer/dist/
+
 # Misc
 tmp_*.txt
 tmp_*.png

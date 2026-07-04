@@ -10,11 +10,8 @@ public sealed partial class MainWindow : Window
 {
     static readonly ResourceLoader ResourceLoader = new();
 
-    readonly BackendProcessManager _backendProcessManager = new(BackendProjectPath);
+    readonly BackendProcessManager _backendProcessManager = new(BackendLocator.BackendProjectPath);
     BackendApiClient? _apiClient;
-
-    static string BackendProjectPath =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..", "backend"));
 
     public MainWindow()
     {
@@ -41,7 +38,9 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            int port = await _backendProcessManager.StartAsync(AppSettings.LastModelId).ConfigureAwait(false);
+            int port = await _backendProcessManager
+                .StartAsync(AppSettings.LastModelId, onSettingUp: NotifyEnvironmentSetup)
+                .ConfigureAwait(false);
             _apiClient = new BackendApiClient(port);
 
             DispatcherQueue.TryEnqueue(() =>
@@ -54,16 +53,30 @@ public sealed partial class MainWindow : Window
                 ModelSelectionButton.IsEnabled = true;
             });
         }
+        catch (UvNotFoundException)
+        {
+            ShowBackendStartupError(ResourceLoader.GetString("MainWindow_UvNotFound"));
+        }
         catch (Exception ex)
         {
-            DispatcherQueue.TryEnqueue(() =>
-                RootFrame.Content = new TextBlock
-                {
-                    Text = string.Format(ResourceLoader.GetString("MainWindow_BackendFailedToStart"), ex.Message),
-                    Margin = new Thickness(20),
-                });
+            ShowBackendStartupError(
+                string.Format(ResourceLoader.GetString("MainWindow_BackendFailedToStart"), ex.Message));
         }
     }
+
+    // 初回セットアップ(uv sync)開始時に呼ばれる。ステータスバーに進捗を表示する。
+    void NotifyEnvironmentSetup() =>
+        DispatcherQueue.TryEnqueue(() =>
+            StatusBarTextBlock.Text = ResourceLoader.GetString("MainWindow_SettingUpEnvironment"));
+
+    void ShowBackendStartupError(string message) =>
+        DispatcherQueue.TryEnqueue(() =>
+            RootFrame.Content = new TextBlock
+            {
+                Text = message,
+                Margin = new Thickness(20),
+                TextWrapping = TextWrapping.Wrap,
+            });
 
     async void ModelSelectionButton_Click(object sender, RoutedEventArgs e)
     {
