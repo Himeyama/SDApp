@@ -18,6 +18,7 @@ public sealed partial class GenerationPage : Page
     readonly GenerationViewModel _viewModel;
 
     int _backendStartingSpinnerIndex;
+    double _skeletonAspectRatio = 1.0;
 
     public event EventHandler<string>? StatusChanged;
 
@@ -114,6 +115,9 @@ public sealed partial class GenerationPage : Page
         _viewModel.Sampler = SamplerComboBox.SelectedItem as string ?? _viewModel.Sampler;
         _viewModel.SeedText = SeedTextBox.Text;
 
+        _skeletonAspectRatio = (double)_viewModel.Width / _viewModel.Height;
+        UpdateSkeletonScreenSize(SkeletonScreenGrid.ActualSize.X, SkeletonScreenGrid.ActualSize.Y);
+
         await _viewModel.GenerateAsync(CancellationToken.None);
     }
 
@@ -133,11 +137,33 @@ public sealed partial class GenerationPage : Page
         }
     }
 
-    void SkeletonScreenGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    void SkeletonScreenGrid_SizeChanged(object sender, SizeChangedEventArgs e) =>
+        UpdateSkeletonScreenSize(e.NewSize.Width, e.NewSize.Height);
+
+    /// <summary>
+    /// Image(Stretch="Uniform")と同じく、指定した幅・高さの比率を保ったまま
+    /// 表示領域に収まる最大サイズでスケルトンのプレースホルダーを中央配置する。
+    /// </summary>
+    void UpdateSkeletonScreenSize(double containerWidth, double containerHeight)
     {
-        SkeletonClipGeometry.Rect = new Windows.Foundation.Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
+        if (containerWidth <= 0 || containerHeight <= 0)
+        {
+            return;
+        }
+
+        double width = containerWidth;
+        double height = width / _skeletonAspectRatio;
+        if (height > containerHeight)
+        {
+            height = containerHeight;
+            width = height * _skeletonAspectRatio;
+        }
+
+        SkeletonScreenBorder.Width = width;
+        SkeletonScreenBorder.Height = height;
+        SkeletonClipGeometry.Rect = new Windows.Foundation.Rect(0, 0, width, height);
         SkeletonShimmerTransform.X = -SkeletonShimmerRectangle.Width;
         SkeletonShimmerAnimation.From = -SkeletonShimmerRectangle.Width;
-        SkeletonShimmerAnimation.To = e.NewSize.Width + SkeletonShimmerRectangle.Width;
+        SkeletonShimmerAnimation.To = width + SkeletonShimmerRectangle.Width;
     }
 }

@@ -7,6 +7,21 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SkeletonBaseBrush" Color="#FFD0D0D0" />
+                    <Color x:Key="SkeletonShimmerColor">#FFF5F5F5</Color>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SkeletonBaseBrush" Color="#FF3A3A3A" />
+                    <Color x:Key="SkeletonShimmerColor">#FF5A5A5A</Color>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
     <Grid ColumnDefinitions="420,*" Padding="20" ColumnSpacing="20">
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12">
@@ -69,24 +84,29 @@
                 <Grid>
                     <Image x:Name="ResultImageControl" Stretch="Uniform" Margin="8" />
 
-                    <Grid x:Name="SkeletonScreenGrid" Visibility="Collapsed" CornerRadius="8"
-                          Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    <Grid x:Name="SkeletonScreenGrid" Visibility="Collapsed" Margin="8"
                           SizeChanged="SkeletonScreenGrid_SizeChanged">
-                        <Grid.Clip>
-                            <RectangleGeometry x:Name="SkeletonClipGeometry" />
-                        </Grid.Clip>
-                        <Rectangle x:Name="SkeletonShimmerRectangle" Width="200">
-                            <Rectangle.RenderTransform>
-                                <TranslateTransform x:Name="SkeletonShimmerTransform" X="-200" />
-                            </Rectangle.RenderTransform>
-                            <Rectangle.Fill>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                    <GradientStop Offset="0.0" Color="Transparent" />
-                                    <GradientStop Offset="0.5" Color="{ThemeResource ControlFillColorSecondary}" />
-                                    <GradientStop Offset="1.0" Color="Transparent" />
-                                </LinearGradientBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
+                        <Border x:Name="SkeletonScreenBorder" CornerRadius="8"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Background="{ThemeResource SkeletonBaseBrush}">
+                            <Grid>
+                                <Grid.Clip>
+                                    <RectangleGeometry x:Name="SkeletonClipGeometry" />
+                                </Grid.Clip>
+                                <Rectangle x:Name="SkeletonShimmerRectangle" Width="200">
+                                    <Rectangle.RenderTransform>
+                                        <TranslateTransform x:Name="SkeletonShimmerTransform" X="-200" />
+                                    </Rectangle.RenderTransform>
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Offset="0.0" Color="Transparent" />
+                                            <GradientStop Offset="0.5" Color="{ThemeResource SkeletonShimmerColor}" />
+                                            <GradientStop Offset="1.0" Color="Transparent" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Grid>
+                        </Border>
                         <Grid.Resources>
                             <Storyboard x:Name="SkeletonShimmerStoryboard" RepeatBehavior="Forever">
                                 <DoubleAnimation x:Name="SkeletonShimmerAnimation"
