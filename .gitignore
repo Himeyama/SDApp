@@ -22,3 +22,4 @@ Thumbs.db
 
 # Local instructions (not for repo)
 CLAUDE.md
+output/*.png
