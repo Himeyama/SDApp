@@ -53,10 +53,6 @@ class SetActiveModelRequest(BaseModel):
     model_id: str
 
 
-class ImportModelRequest(BaseModel):
-    model_path: str
-
-
 class LoraFileInfo(BaseModel):
     """A LoRA file available locally, identified by its absolute path."""
 
@@ -64,5 +60,11 @@ class LoraFileInfo(BaseModel):
     size_on_disk_bytes: int
 
 
-class ImportLoraRequest(BaseModel):
-    lora_path: str
+class ScanDirectoriesInfo(BaseModel):
+    """The user-configured directories scanned for checkpoints and LoRA files.
+
+    Either may be null when unset; the corresponding scan then yields nothing.
+    """
+
+    model_dir: str | None = None
+    lora_dir: str | None = None

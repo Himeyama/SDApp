@@ -79,129 +79,76 @@ def test_set_active_model_rejects_unknown_model(
     assert response.status_code == 422
 
 
-def test_import_model(client: TestClient, tmp_path) -> None:
-    checkpoint = tmp_path / "my-model.safetensors"
-    checkpoint.write_bytes(b"fake checkpoint data")
-
-    response = client.post("/api/v1/models/imported", json={"model_path": str(checkpoint)})
+def test_get_directories_defaults_to_unset(client: TestClient) -> None:
+    response = client.get("/api/v1/settings/directories")
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["model_id"] == str(checkpoint)
-    assert body["is_active"] is False
-    assert body["size_on_disk_bytes"] == checkpoint.stat().st_size
+    assert response.json() == {"model_dir": None, "lora_dir": None}
 
 
-def test_import_model_rejects_missing_file(client: TestClient, tmp_path) -> None:
-    missing = tmp_path / "does-not-exist.safetensors"
+def test_put_directories_persists_and_round_trips(client: TestClient, tmp_path) -> None:
+    model_dir = tmp_path / "models"
+    lora_dir = tmp_path / "loras"
+    model_dir.mkdir()
+    lora_dir.mkdir()
 
-    response = client.post("/api/v1/models/imported", json={"model_path": str(missing)})
+    put = client.put(
+        "/api/v1/settings/directories",
+        json={"model_dir": str(model_dir), "lora_dir": str(lora_dir)},
+    )
+    assert put.status_code == 200
+    assert put.json() == {"model_dir": str(model_dir), "lora_dir": str(lora_dir)}
 
-    assert response.status_code == 422
-
-
-def test_import_model_rejects_unsupported_extension(client: TestClient, tmp_path) -> None:
-    unsupported = tmp_path / "notes.txt"
-    unsupported.write_text("not a checkpoint")
-
-    response = client.post("/api/v1/models/imported", json={"model_path": str(unsupported)})
-
-    assert response.status_code == 422
-
-
-def test_list_models_includes_imported_models(client: TestClient, tmp_path) -> None:
-    checkpoint = tmp_path / "my-model.safetensors"
-    checkpoint.write_bytes(b"fake checkpoint data")
-    client.post("/api/v1/models/imported", json={"model_path": str(checkpoint)})
-
-    response = client.get("/api/v1/models")
-
-    assert response.status_code == 200
-    model_ids = [model["model_id"] for model in response.json()]
-    assert str(checkpoint) in model_ids
+    got = client.get("/api/v1/settings/directories")
+    assert got.json() == {"model_dir": str(model_dir), "lora_dir": str(lora_dir)}
 
 
-def test_remove_imported_model(client: TestClient, tmp_path) -> None:
-    checkpoint = tmp_path / "my-model.safetensors"
-    checkpoint.write_bytes(b"fake checkpoint data")
-    client.post("/api/v1/models/imported", json={"model_path": str(checkpoint)})
-
-    response = client.request(
-        "DELETE", "/api/v1/models/imported", json={"model_path": str(checkpoint)}
+def test_put_directories_rejects_missing_directory(client: TestClient, tmp_path) -> None:
+    response = client.put(
+        "/api/v1/settings/directories",
+        json={"model_dir": str(tmp_path / "nope"), "lora_dir": None},
     )
 
-    assert response.status_code == 200
-    assert response.json()["model_id"] == str(checkpoint)
-    # Dropped from the registry but the file itself is left on disk.
-    assert checkpoint.exists()
+    assert response.status_code == 422
+
+
+def test_list_models_scans_model_directory(client: TestClient, tmp_path) -> None:
+    model_dir = tmp_path / "models"
+    (model_dir / "sub").mkdir(parents=True)
+    (model_dir / "a.safetensors").write_bytes(b"x")
+    (model_dir / "sub" / "b.ckpt").write_bytes(b"y")
+    (model_dir / "notes.txt").write_text("ignore me")
+    client.put(
+        "/api/v1/settings/directories", json={"model_dir": str(model_dir), "lora_dir": None}
+    )
+
     model_ids = [model["model_id"] for model in client.get("/api/v1/models").json()]
-    assert str(checkpoint) not in model_ids
+
+    assert str(model_dir / "a.safetensors") in model_ids
+    assert str(model_dir / "sub" / "b.ckpt") in model_ids
+    assert str(model_dir / "notes.txt") not in model_ids
 
 
-def test_remove_imported_model_rejects_active_model(
-    client: TestClient, tmp_path, mock_pipeline_manager
-) -> None:
-    checkpoint = tmp_path / "active.safetensors"
-    checkpoint.write_bytes(b"fake checkpoint data")
-    client.post("/api/v1/models/imported", json={"model_path": str(checkpoint)})
-    mock_pipeline_manager.model_id = str(checkpoint)
-
-    response = client.request(
-        "DELETE", "/api/v1/models/imported", json={"model_path": str(checkpoint)}
+def test_list_loras_scans_lora_directory(client: TestClient, tmp_path) -> None:
+    lora_dir = tmp_path / "loras"
+    (lora_dir / "deep").mkdir(parents=True)
+    (lora_dir / "l1.safetensors").write_bytes(b"z")
+    (lora_dir / "deep" / "l2.safetensors").write_bytes(b"w")
+    (lora_dir / "l3.ckpt").write_bytes(b"q")  # .ckpt is not a LoRA format
+    client.put(
+        "/api/v1/settings/directories", json={"model_dir": None, "lora_dir": str(lora_dir)}
     )
 
-    assert response.status_code == 409
+    lora_ids = [item["lora_id"] for item in client.get("/api/v1/loras").json()]
+
+    assert lora_ids == [str(lora_dir / "deep" / "l2.safetensors"), str(lora_dir / "l1.safetensors")]
 
 
-def test_remove_imported_model_rejects_unknown_model(client: TestClient, tmp_path) -> None:
-    response = client.request(
-        "DELETE",
-        "/api/v1/models/imported",
-        json={"model_path": str(tmp_path / "never-imported.safetensors")},
-    )
-
-    assert response.status_code == 404
-
-
-def test_import_lora(client: TestClient, tmp_path) -> None:
-    lora = tmp_path / "style.safetensors"
-    lora.write_bytes(b"fake lora data")
-
-    response = client.post("/api/v1/loras/imported", json={"lora_path": str(lora)})
-
-    assert response.status_code == 200
-    body = response.json()
-    assert body["lora_id"] == str(lora)
-    assert body["size_on_disk_bytes"] == lora.stat().st_size
-
-
-def test_import_lora_rejects_missing_file(client: TestClient, tmp_path) -> None:
-    missing = tmp_path / "does-not-exist.safetensors"
-
-    response = client.post("/api/v1/loras/imported", json={"lora_path": str(missing)})
-
-    assert response.status_code == 422
-
-
-def test_import_lora_rejects_unsupported_extension(client: TestClient, tmp_path) -> None:
-    unsupported = tmp_path / "style.ckpt"
-    unsupported.write_bytes(b"not a lora")
-
-    response = client.post("/api/v1/loras/imported", json={"lora_path": str(unsupported)})
-
-    assert response.status_code == 422
-
-
-def test_list_loras_includes_imported_loras(client: TestClient, tmp_path) -> None:
-    lora = tmp_path / "style.safetensors"
-    lora.write_bytes(b"fake lora data")
-    client.post("/api/v1/loras/imported", json={"lora_path": str(lora)})
-
+def test_list_loras_empty_when_unset(client: TestClient) -> None:
     response = client.get("/api/v1/loras")
 
     assert response.status_code == 200
-    lora_ids = [item["lora_id"] for item in response.json()]
-    assert str(lora) in lora_ids
+    assert response.json() == []
 
 
 def test_text_to_image_forwards_loras(client: TestClient, mock_pipeline_manager) -> None:

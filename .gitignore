@@ -6,7 +6,6 @@ backend/.pytest_cache/
 backend/__pycache__/
 **/__pycache__/
 *.py[oc]
-imported_models.json
 
 # .NET frontend
 frontend/**/bin/
@@ -31,4 +30,8 @@ CLAUDE.md
 output/*.png
 outputs/*.png
 docs/stable-diffusion-webui-setup-notes.md
+
+# Backend runtime stores (generated relative to the launch cwd)
 imported*.json
+known_hf_models.json
+directories.json

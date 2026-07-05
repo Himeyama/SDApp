@@ -1,9 +1,9 @@
-"""Lists the text-to-image models the app offers: known HF repos and imported single files.
+"""Lists the text-to-image models the app offers: known HF repos and scanned checkpoints.
 
 The app deliberately does *not* enumerate the entire Hugging Face cache — that surfaces
 unrelated repos the user never chose. It lists only the repos it tracks as base models
-(see [known_hf_models_store]) plus locally imported checkpoints, always flagging the
-active one.
+(see [known_hf_models_store]) plus any single-file checkpoints found by scanning the
+user-configured model directory, always flagging the active one.
 """
 
 from pathlib import Path
@@ -11,14 +11,16 @@ from pathlib import Path
 from huggingface_hub import scan_cache_dir
 from huggingface_hub.utils import CachedRepoInfo
 
-from sodalite_backend.inference.imported_models_store import load_imported_model_paths
+from sodalite_backend.inference.directories_store import load_directories
 from sodalite_backend.inference.known_hf_models_store import load_known_hf_model_ids
 from sodalite_backend.schemas.generation import ModelInfo
 
+CHECKPOINT_EXTENSIONS = {".safetensors", ".ckpt"}
+
 
 def list_cached_models(active_model_id: str) -> list[ModelInfo]:
-    """List the offered models (known HF repos + imported single files), flagging the active one."""
-    models = _list_hf_models(active_model_id) + _list_imported_models(active_model_id)
+    """List the offered models (known HF repos + scanned checkpoints), flagging the active one."""
+    models = _list_hf_models(active_model_id) + _list_directory_models(active_model_id)
     if not any(model.is_active for model in models):
         models.append(ModelInfo(model_id=active_model_id, is_active=True, size_on_disk_bytes=0))
     return sorted(models, key=lambda model: model.model_id)
@@ -42,15 +44,33 @@ def _list_hf_models(active_model_id: str) -> list[ModelInfo]:
     ]
 
 
-def _list_imported_models(active_model_id: str) -> list[ModelInfo]:
+def _list_directory_models(active_model_id: str) -> list[ModelInfo]:
+    """Single-file checkpoints found by scanning the configured model directory."""
+    model_dir = load_directories().model_dir
+    if model_dir is None:
+        return []
+
     return [
         ModelInfo(
-            model_id=path,
-            is_active=path == active_model_id,
-            size_on_disk_bytes=Path(path).stat().st_size if Path(path).exists() else 0,
+            model_id=str(path),
+            is_active=str(path) == active_model_id,
+            size_on_disk_bytes=path.stat().st_size,
         )
-        for path in load_imported_model_paths()
+        for path in scan_checkpoint_files(Path(model_dir))
     ]
+
+
+def scan_checkpoint_files(directory: Path) -> list[Path]:
+    """Recursively find supported checkpoint files under directory, sorted by path."""
+    if not directory.is_dir():
+        return []
+
+    files = [
+        path
+        for path in directory.rglob("*")
+        if path.is_file() and path.suffix.lower() in CHECKPOINT_EXTENSIONS
+    ]
+    return sorted(files)
 
 
 def _has_pipeline_files(repo: CachedRepoInfo) -> bool:

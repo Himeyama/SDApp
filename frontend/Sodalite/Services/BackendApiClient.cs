@@ -78,51 +78,38 @@ sealed class BackendApiClient(int port) : IDisposable
         return new ModelInfo(dto.ModelId, dto.IsActive, dto.SizeOnDiskBytes);
     }
 
-    public async Task<ModelInfo> ImportModelAsync(string modelPath, CancellationToken ct)
-    {
-        HttpResponseMessage response = await _http
-            .PostAsJsonAsync("/api/v1/models/imported", new ImportModelBody(modelPath), ct)
-            .ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
-        ModelDto dto = await response.Content
-            .ReadFromJsonAsync<ModelDto>(ct)
-            .ConfigureAwait(false)
-            ?? throw new InvalidOperationException("Empty response from backend.");
-
-        return new ModelInfo(dto.ModelId, dto.IsActive, dto.SizeOnDiskBytes);
-    }
-
-    public async Task RemoveImportedModelAsync(string modelPath, CancellationToken ct)
-    {
-        HttpRequestMessage request = new(HttpMethod.Delete, "/api/v1/models/imported")
-        {
-            Content = JsonContent.Create(new ImportModelBody(modelPath)),
-        };
-
-        HttpResponseMessage response = await _http.SendAsync(request, ct).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-    }
-
     public async Task<List<LoraFileInfo>> GetLorasAsync(CancellationToken ct)
     {
         List<LoraDto>? dtos = await _http.GetFromJsonAsync<List<LoraDto>>("/api/v1/loras", ct).ConfigureAwait(false);
         return dtos?.Select(dto => new LoraFileInfo(dto.LoraId, dto.SizeOnDiskBytes)).ToList() ?? [];
     }
 
-    public async Task<LoraFileInfo> ImportLoraAsync(string loraPath, CancellationToken ct)
+    public async Task<ScanDirectories> GetScanDirectoriesAsync(CancellationToken ct)
     {
-        HttpResponseMessage response = await _http
-            .PostAsJsonAsync("/api/v1/loras/imported", new ImportLoraBody(loraPath), ct)
-            .ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
-        LoraDto dto = await response.Content
-            .ReadFromJsonAsync<LoraDto>(ct)
+        ScanDirectoriesDto dto = await _http
+            .GetFromJsonAsync<ScanDirectoriesDto>("/api/v1/settings/directories", ct)
             .ConfigureAwait(false)
             ?? throw new InvalidOperationException("Empty response from backend.");
 
-        return new LoraFileInfo(dto.LoraId, dto.SizeOnDiskBytes);
+        return new ScanDirectories(dto.ModelDir, dto.LoraDir);
+    }
+
+    public async Task<ScanDirectories> SetScanDirectoriesAsync(ScanDirectories directories, CancellationToken ct)
+    {
+        HttpResponseMessage response = await _http
+            .PutAsJsonAsync(
+                "/api/v1/settings/directories",
+                new ScanDirectoriesDto(directories.ModelDir, directories.LoraDir),
+                ct)
+            .ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        ScanDirectoriesDto dto = await response.Content
+            .ReadFromJsonAsync<ScanDirectoriesDto>(ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Empty response from backend.");
+
+        return new ScanDirectories(dto.ModelDir, dto.LoraDir);
     }
 
     public void Dispose() => _http.Dispose();
@@ -158,13 +145,15 @@ sealed class BackendApiClient(int port) : IDisposable
 
     sealed record SetActiveModelBody([property: JsonPropertyName("model_id")] string ModelId);
 
-    sealed record ImportModelBody([property: JsonPropertyName("model_path")] string ModelPath);
-
     sealed record LoraDto(
         [property: JsonPropertyName("lora_id")] string LoraId,
         [property: JsonPropertyName("size_on_disk_bytes")] long SizeOnDiskBytes);
 
-    sealed record ImportLoraBody([property: JsonPropertyName("lora_path")] string LoraPath);
+    sealed record ScanDirectoriesDto(
+        [property: JsonPropertyName("model_dir")] string? ModelDir,
+        [property: JsonPropertyName("lora_dir")] string? LoraDir);
 }
 
 sealed record HealthInfo(string Status, string Device, string LoadedModel);
+
+sealed record ScanDirectories(string? ModelDir, string? LoraDir);

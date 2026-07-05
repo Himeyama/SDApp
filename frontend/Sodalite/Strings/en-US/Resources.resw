@@ -78,14 +78,11 @@
     <value>uv was not found. The Sodalite backend requires uv. Please install it from https://docs.astral.sh/uv/ and then restart the app.</value>
   </data>
 
-  <data name="ModelSelectionDialog.Title" xml:space="preserve">
+  <data name="ModelSelectionPage_Title.Text" xml:space="preserve">
     <value>Select model</value>
   </data>
-  <data name="ModelSelectionDialog.CloseButtonText" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="ModelSelectionDialog_Description.Text" xml:space="preserve">
-    <value>Choose from models already downloaded locally, or import a .safetensors/.ckpt file using the button below.</value>
+  <data name="ModelSelectionPage_BackButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Back</value>
   </data>
   <data name="ModelSelectionDialog_LoadErrorTitle" xml:space="preserve">
     <value>Failed to load model list</value>
@@ -93,39 +90,40 @@
   <data name="ModelSelectionDialog_SwitchErrorTitle" xml:space="preserve">
     <value>Failed to switch model</value>
   </data>
-  <data name="ModelSelectionDialog_ImportButton.Content" xml:space="preserve">
-    <value>Import from local file...</value>
-  </data>
-  <data name="ModelSelectionDialog_ImportErrorTitle" xml:space="preserve">
-    <value>Failed to import model</value>
-  </data>
-  <data name="ModelSelectionDialog_RemoveErrorTitle" xml:space="preserve">
-    <value>Failed to remove model</value>
-  </data>
   <data name="ModelSelectionDialog_ModelHeader.Text" xml:space="preserve">
     <value>Base model</value>
   </data>
   <data name="ModelSelectionDialog_LoraHeader.Text" xml:space="preserve">
     <value>LoRA</value>
   </data>
-  <data name="ModelSelectionDialog_AddLoraButtonTooltip" xml:space="preserve">
+  <data name="ModelSelectionDialog_AddLoraButtonTooltip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Add LoRA</value>
   </data>
   <data name="ModelSelectionDialog_LoraEmpty.Text" xml:space="preserve">
     <value>No LoRA applied. Add one with the + button.</value>
   </data>
-  <data name="ModelSelectionDialog_ImportLoraItem.Text" xml:space="preserve">
-    <value>Import from local file...</value>
+
+  <data name="ModelSelectionPage_ChooseFolderLabel.Text" xml:space="preserve">
+    <value>Choose folder</value>
+  </data>
+  <data name="ModelSelectionPage_ChooseModelDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Choose the folder that holds your models (subfolders are scanned recursively).</value>
+  </data>
+  <data name="ModelSelectionPage_ChooseLoraDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Choose the folder that holds your LoRA files (subfolders are scanned recursively).</value>
+  </data>
+  <data name="ModelSelectionPage_ModelDirUnset.Text" xml:space="preserve">
+    <value>No model folder set. Choose one with the "Choose folder" button on the right.</value>
+  </data>
+  <data name="ModelSelectionPage_LoraDirUnset.Text" xml:space="preserve">
+    <value>No LoRA folder set. Choose one with the "Choose folder" button on the right.</value>
+  </data>
+  <data name="ModelSelectionPage_DirectoryErrorTitle" xml:space="preserve">
+    <value>Failed to set folder</value>
   </data>
 
   <data name="LoraSelectionDialog_LoadErrorTitle" xml:space="preserve">
     <value>Failed to load LoRA list</value>
-  </data>
-  <data name="LoraSelectionDialog_ImportButton.Content" xml:space="preserve">
-    <value>Import from local file...</value>
-  </data>
-  <data name="LoraSelectionDialog_ImportErrorTitle" xml:space="preserve">
-    <value>Failed to import LoRA</value>
   </data>
 
   <data name="Generation_PromptLabel.Text" xml:space="preserve">

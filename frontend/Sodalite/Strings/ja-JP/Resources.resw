@@ -78,14 +78,11 @@
     <value>uv が見つかりませんでした。Sodalite のバックエンドには uv が必要です。https://docs.astral.sh/uv/ からインストールしてから、アプリを再起動してください。</value>
   </data>
 
-  <data name="ModelSelectionDialog.Title" xml:space="preserve">
+  <data name="ModelSelectionPage_Title.Text" xml:space="preserve">
     <value>モデルを選択</value>
   </data>
-  <data name="ModelSelectionDialog.CloseButtonText" xml:space="preserve">
-    <value>閉じる</value>
-  </data>
-  <data name="ModelSelectionDialog_Description.Text" xml:space="preserve">
-    <value>ローカルにダウンロード済みのモデルから選択できます。下のボタンから.safetensors/.ckptファイルをインポートすることもできます。</value>
+  <data name="ModelSelectionPage_BackButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>戻る</value>
   </data>
   <data name="ModelSelectionDialog_LoadErrorTitle" xml:space="preserve">
     <value>モデル一覧の取得に失敗しました</value>
@@ -93,39 +90,40 @@
   <data name="ModelSelectionDialog_SwitchErrorTitle" xml:space="preserve">
     <value>モデルの切り替えに失敗しました</value>
   </data>
-  <data name="ModelSelectionDialog_ImportButton.Content" xml:space="preserve">
-    <value>ローカルファイルからインポート...</value>
-  </data>
-  <data name="ModelSelectionDialog_ImportErrorTitle" xml:space="preserve">
-    <value>モデルのインポートに失敗しました</value>
-  </data>
-  <data name="ModelSelectionDialog_RemoveErrorTitle" xml:space="preserve">
-    <value>モデルの削除に失敗しました</value>
-  </data>
   <data name="ModelSelectionDialog_ModelHeader.Text" xml:space="preserve">
     <value>ベースモデル</value>
   </data>
   <data name="ModelSelectionDialog_LoraHeader.Text" xml:space="preserve">
     <value>LoRA</value>
   </data>
-  <data name="ModelSelectionDialog_AddLoraButtonTooltip" xml:space="preserve">
+  <data name="ModelSelectionDialog_AddLoraButtonTooltip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>LoRA を追加</value>
   </data>
   <data name="ModelSelectionDialog_LoraEmpty.Text" xml:space="preserve">
     <value>適用中の LoRA はありません。＋ボタンから追加できます。</value>
   </data>
-  <data name="ModelSelectionDialog_ImportLoraItem.Text" xml:space="preserve">
-    <value>ローカルファイルからインポート...</value>
+
+  <data name="ModelSelectionPage_ChooseFolderLabel.Text" xml:space="preserve">
+    <value>フォルダを選択</value>
+  </data>
+  <data name="ModelSelectionPage_ChooseModelDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>モデルを置いているフォルダを指定します（サブフォルダも再帰的にスキャンします）。</value>
+  </data>
+  <data name="ModelSelectionPage_ChooseLoraDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>LoRA を置いているフォルダを指定します（サブフォルダも再帰的にスキャンします）。</value>
+  </data>
+  <data name="ModelSelectionPage_ModelDirUnset.Text" xml:space="preserve">
+    <value>モデルフォルダが未設定です。右の「フォルダを選択」から指定してください。</value>
+  </data>
+  <data name="ModelSelectionPage_LoraDirUnset.Text" xml:space="preserve">
+    <value>LoRA フォルダが未設定です。右の「フォルダを選択」から指定してください。</value>
+  </data>
+  <data name="ModelSelectionPage_DirectoryErrorTitle" xml:space="preserve">
+    <value>フォルダの設定に失敗しました</value>
   </data>
 
   <data name="LoraSelectionDialog_LoadErrorTitle" xml:space="preserve">
     <value>LoRA 一覧の取得に失敗しました</value>
-  </data>
-  <data name="LoraSelectionDialog_ImportButton.Content" xml:space="preserve">
-    <value>ローカルファイルからインポート...</value>
-  </data>
-  <data name="LoraSelectionDialog_ImportErrorTitle" xml:space="preserve">
-    <value>LoRA のインポートに失敗しました</value>
   </data>
 
   <data name="Generation_PromptLabel.Text" xml:space="preserve">

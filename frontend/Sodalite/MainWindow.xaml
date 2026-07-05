@@ -23,7 +23,10 @@
             </StackPanel>
         </Grid>
 
-        <Frame x:Name="RootFrame" Grid.Row="1" />
+        <!-- ページ遷移を横スライドで見せるため Frame ではなく重ね置きの Grid を使う。
+             GenerationPage はイベント購読済みの保持インスタンスをそのまま載せ続け、
+             モデル選択ページを右から重ねてスライドイン/アウトさせる。 -->
+        <Grid x:Name="RootHost" Grid.Row="1" />
 
         <Border x:Name="SetupOverlay" Grid.Row="1" Visibility="Collapsed"
                 Background="{ThemeResource LayerFillColorDefaultBrush}">
