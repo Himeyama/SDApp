@@ -12,6 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
