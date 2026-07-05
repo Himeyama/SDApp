@@ -92,6 +92,9 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
         // 起動時の環境と揃える。hf_xet 経由のダウンロードはこの環境でハングすることがあるため無効化する。
         startInfo.Environment["HF_HUB_DISABLE_XET"] = "1";
 
+        // torch (数 GiB) のダウンロードは既定の 30 秒タイムアウトだと回線次第で切れることがあるため延長する。
+        startInfo.Environment["UV_HTTP_TIMEOUT"] = "3600";
+
         // インストール構成では仮想環境を書き込み権限のあるユーザー領域に作る(インストール先の
         // Program Files は書き込み不可)。開発構成では null なので設定せず backend\.venv を使う。
         // uv run 側 (BackendProcessManager) と必ず同じ場所を指すこと。
@@ -108,6 +111,7 @@ sealed class BackendEnvironmentSetup(string backendProjectPath)
         }
 
         startInfo.ArgumentList.Add("sync");
+        startInfo.ArgumentList.Add("--no-dev");
         startInfo.ArgumentList.Add("--project");
         startInfo.ArgumentList.Add(_backendProjectPath);
 
