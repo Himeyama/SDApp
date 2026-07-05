@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    SDApp (WinUI3フロントエンド) をビルドして起動する。
+    Sodalite (WinUI3フロントエンド) をビルドして起動する。
     Pythonバックエンドはフロントエンドが自動的にサブプロセスとして起動する。
     ビルドは Makefile に委譲し、変更のないターゲット(uv sync / dotnet build)はスキップされる。
 

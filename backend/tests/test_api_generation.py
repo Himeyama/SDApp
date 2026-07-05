@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from sdapp_backend.schemas.generation import ModelInfo
+from sodalite_backend.schemas.generation import ModelInfo
 
 
 def test_health(client: TestClient) -> None:
@@ -42,7 +42,7 @@ def test_list_models(client: TestClient, monkeypatch) -> None:
         ModelInfo(model_id="other/model", is_active=False, size_on_disk_bytes=456),
     ]
     monkeypatch.setattr(
-        "sdapp_backend.api.system.list_cached_models", lambda active_model_id: fake_models
+        "sodalite_backend.api.system.list_cached_models", lambda active_model_id: fake_models
     )
 
     response = client.get("/api/v1/models")

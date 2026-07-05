@@ -18,4 +18,4 @@ $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
 uv sync
-uv run sdapp-backend --port $Port
+uv run sodalite-backend --port $Port

@@ -1,4 +1,4 @@
-# SDApp
+# Sodalite
 
 Stable Diffusion 画像生成デスクトップアプリ。一から独自実装したもの。
 
@@ -9,9 +9,9 @@ Stable Diffusion 画像生成デスクトップアプリ。一から独自実装
 ## ディレクトリ構成
 
 ```
-SDApp/
+Sodalite/
 ├── backend/           # Pythonバックエンド (uv管理, FastAPI + diffusers)
-│   ├── src/sdapp_backend/
+│   ├── src/sodalite_backend/
 │   │   ├── main.py            # FastAPIエントリポイント
 │   │   ├── config.py          # 起動設定(ポート・モデルID)
 │   │   ├── api/                # REST APIエンドポイント
@@ -19,7 +19,7 @@ SDApp/
 │   │   ├── inference/           # diffusersパイプライン管理・サンプラー
 │   │   └── imaging/            # PNGメタデータ埋め込み・画像保存
 │   └── tests/
-├── frontend/SDApp/    # WinUI3フロントエンド
+├── frontend/Sodalite/    # WinUI3フロントエンド
 │   ├── MainWindow.xaml(.cs)    # バックエンド起動・ナビゲーション
 │   ├── Views/GenerationPage    # プロンプト入力・生成・画像表示
 │   ├── ViewModels/              # GenerationViewModel
@@ -80,13 +80,13 @@ uv run ruff format .
 uv run pytest
 
 # フロントエンドのビルド
-cd frontend/SDApp
+cd frontend/Sodalite
 dotnet build -c Debug
 ```
 
 ## 配布 (インストーラー)
 
-エンドユーザー向けに NSIS 製インストーラー (`SDApp-Setup-<version>.exe`) を生成できる。
+エンドユーザー向けに NSIS 製インストーラー (`Sodalite-Setup-<version>.exe`) を生成できる。
 
 ### 前提条件
 
@@ -103,15 +103,16 @@ dotnet build -c Debug
 make installer
 ```
 
-`installer/dist/SDApp-Setup-<version>.exe` が生成される。
+`installer/dist/Sodalite-Setup-<version>.exe` が生成される。
 
 ### インストール後の初回起動
 
-インストーラーは `C:\Program Files\SDApp\` に `app\` (フロントエンド) と `backend\`
-(Python ソース) を配置する。`.venv` は同梱されず、**初回起動時にフロントエンドが `uv sync`
-を実行**して仮想環境を作成・依存パッケージをインストールする (torch 等で数GB、数分〜数十分)。
+インストーラーは `%LOCALAPPDATA%\Programs\Sodalite\` に `app\` (フロントエンド) と `backend\`
+(Python ソース) を配置する(管理者権限不要のユーザーインストール)。`.venv` は同梱されず、
+**初回起動時にフロントエンドが `uv sync` を実行**して仮想環境を作成・依存パッケージを
+インストールする (torch 等で数GB、数分〜数十分)。
 
-- セットアップの成否は `%LOCALAPPDATA%\SDApp\.venv-ready` に記録される
+- セットアップの成否は `%LOCALAPPDATA%\Sodalite\.venv-ready` に記録される
   (`uv.lock` のハッシュを保存)。成功した場合のみマーカーが書かれ、失敗した場合は
   **次回起動時に自動で再セットアップ**が走る。アプリ更新で依存が変わった場合も再同期される。
 - uv が見つからない場合は、アプリ起動時に uv のインストールを促すメッセージが表示される。
@@ -126,4 +127,4 @@ make installer
 | GET | `/api/v1/samplers` | 利用可能なサンプラー一覧 |
 | POST | `/api/v1/generations/text-to-image` | txt2img生成 |
 
-詳細は `backend/src/sdapp_backend/api/` を参照。
+詳細は `backend/src/sodalite_backend/api/` を参照。

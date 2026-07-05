@@ -1,7 +1,7 @@
 [project]
-name = "sdapp-backend"
+name = "sodalite-backend"
 version = "0.1.0"
-description = "SDApp local image-generation backend"
+description = "Sodalite local image-generation backend"
 readme = "README.md"
 authors = [
     { name = "ひかり", email = "hikari.photon+dev@gmail.com" }
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-sdapp-backend = "sdapp_backend.main:run"
+sodalite-backend = "sodalite_backend.main:run"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]

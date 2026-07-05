@@ -21,7 +21,7 @@ def mock_pipeline_manager() -> MagicMock:
 def client(mock_pipeline_manager: MagicMock, tmp_path, monkeypatch) -> Iterator[TestClient]:
     monkeypatch.chdir(tmp_path)
 
-    from sdapp_backend import main as main_module
+    from sodalite_backend import main as main_module
 
     monkeypatch.setattr(main_module, "PipelineManager", lambda model_id: mock_pipeline_manager)
 

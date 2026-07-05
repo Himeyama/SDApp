@@ -2,12 +2,12 @@
 
 from unittest.mock import MagicMock, patch
 
-from sdapp_backend.inference.pipeline_manager import PipelineManager
+from sodalite_backend.inference.pipeline_manager import PipelineManager
 
 
 def _make_manager() -> PipelineManager:
     with patch(
-        "sdapp_backend.inference.pipeline_manager.AutoPipelineForText2Image"
+        "sodalite_backend.inference.pipeline_manager.AutoPipelineForText2Image"
     ) as mock_auto:
         mock_auto.from_pretrained.return_value.to.return_value = MagicMock()
         return PipelineManager("stub/model")
@@ -17,7 +17,7 @@ def test_load_model_uses_from_pretrained_for_repo_id() -> None:
     manager = _make_manager()
 
     with patch(
-        "sdapp_backend.inference.pipeline_manager.AutoPipelineForText2Image"
+        "sodalite_backend.inference.pipeline_manager.AutoPipelineForText2Image"
     ) as mock_auto:
         mock_auto.from_pretrained.return_value.to.return_value = MagicMock()
 
@@ -33,7 +33,7 @@ def test_load_model_uses_single_file_for_local_checkpoint(tmp_path) -> None:
     checkpoint.write_bytes(b"fake checkpoint data")
 
     with patch(
-        "sdapp_backend.inference.pipeline_manager.StableDiffusionXLPipeline"
+        "sodalite_backend.inference.pipeline_manager.StableDiffusionXLPipeline"
     ) as mock_sdxl:
         mock_sdxl.from_single_file.return_value.to.return_value = MagicMock()
 
@@ -50,10 +50,10 @@ def test_load_model_falls_back_to_sd15_when_sdxl_load_fails(tmp_path) -> None:
 
     with (
         patch(
-            "sdapp_backend.inference.pipeline_manager.StableDiffusionXLPipeline"
+            "sodalite_backend.inference.pipeline_manager.StableDiffusionXLPipeline"
         ) as mock_sdxl,
         patch(
-            "sdapp_backend.inference.pipeline_manager.StableDiffusionPipeline"
+            "sodalite_backend.inference.pipeline_manager.StableDiffusionPipeline"
         ) as mock_sd15,
     ):
         mock_sdxl.from_single_file.side_effect = RuntimeError("not an sdxl checkpoint")

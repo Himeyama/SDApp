@@ -1,4 +1,4 @@
-# SDApp 配布用インストーラーのビルドスクリプト。
+# Sodalite 配布用インストーラーのビルドスクリプト。
 #
 # 1. フロントエンドを dotnet publish (Release, win-x64, 自己完結) して staging\app へ
 # 2. Python バックエンドのソースを staging\backend へコピー (.venv 等の配布不要物は除外)
@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 
 $installerDir = $PSScriptRoot
 $repoRoot = Split-Path -Parent $installerDir
-$frontendProj = Join-Path $repoRoot "frontend\SDApp\SDApp.csproj"
+$frontendProj = Join-Path $repoRoot "frontend\Sodalite\Sodalite.csproj"
 $backendSrc = Join-Path $repoRoot "backend"
 
 $stagingDir = Join-Path $installerDir "staging"
@@ -81,12 +81,12 @@ if (-not $makensis) {
 # 解決されるため、installer\ を作業ディレクトリにして実行する。
 Push-Location $installerDir
 try {
-    & $makensis "/DPRODUCT_VERSION=$Version" "SDApp.nsi"
+    & $makensis "/DPRODUCT_VERSION=$Version" "Sodalite.nsi"
     if ($LASTEXITCODE -ne 0) { throw "makensis failed with exit code $LASTEXITCODE" }
 }
 finally {
     Pop-Location
 }
 
-$output = Join-Path $distDir "SDApp-Setup-$Version.exe"
+$output = Join-Path $distDir "Sodalite-Setup-$Version.exe"
 Write-Host "==> Done: $output" -ForegroundColor Green

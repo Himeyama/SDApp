@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>Sodalite</value>
+  </data>
+  <data name="MainWindow_TitleBarText.Text" xml:space="preserve">
+    <value>Sodalite</value>
+  </data>
+  <data name="MainWindow_BackendFailedToStart" xml:space="preserve">
+    <value>Backend failed to start: {0}</value>
+  </data>
+  <data name="SetupOverlay_Title.Text" xml:space="preserve">
+    <value>First-time setup in progress...</value>
+  </data>
+  <data name="SetupOverlay_Description.Text" xml:space="preserve">
+    <value>Downloading and installing Python dependencies. This can take several minutes to tens of minutes.</value>
+  </data>
+  <data name="MainWindow_UvNotFound" xml:space="preserve">
+    <value>uv was not found. The Sodalite backend requires uv. Please install it from https://docs.astral.sh/uv/ and then restart the app.</value>
+  </data>
+
+  <data name="ModelSelectionDialog.Title" xml:space="preserve">
+    <value>Select model</value>
+  </data>
+  <data name="ModelSelectionDialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ModelSelectionDialog_Description.Text" xml:space="preserve">
+    <value>Choose from models already downloaded locally, or import a .safetensors/.ckpt file using the button below.</value>
+  </data>
+  <data name="ModelSelectionDialog_LoadErrorTitle" xml:space="preserve">
+    <value>Failed to load model list</value>
+  </data>
+  <data name="ModelSelectionDialog_SwitchErrorTitle" xml:space="preserve">
+    <value>Failed to switch model</value>
+  </data>
+  <data name="ModelSelectionDialog_ImportButton.Content" xml:space="preserve">
+    <value>Import from local file...</value>
+  </data>
+  <data name="ModelSelectionDialog_ImportErrorTitle" xml:space="preserve">
+    <value>Failed to import model</value>
+  </data>
+
+  <data name="Generation_PromptLabel.Text" xml:space="preserve">
+    <value>Prompt</value>
+  </data>
+  <data name="Generation_PromptTextBox.PlaceholderText" xml:space="preserve">
+    <value>a cat wearing sunglasses</value>
+  </data>
+  <data name="Generation_NegativePromptLabel.Text" xml:space="preserve">
+    <value>Negative prompt</value>
+  </data>
+  <data name="Generation_NegativePromptTextBox.PlaceholderText" xml:space="preserve">
+    <value>low quality, blurry</value>
+  </data>
+  <data name="Generation_SamplerLabel.Text" xml:space="preserve">
+    <value>Sampler</value>
+  </data>
+  <data name="Generation_SeedLabel.Text" xml:space="preserve">
+    <value>Seed (empty = random)</value>
+  </data>
+  <data name="Generation_SeedTextBox.PlaceholderText" xml:space="preserve">
+    <value>random</value>
+  </data>
+  <data name="Generation_StepsLabel.Text" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Generation_CfgScaleLabel.Text" xml:space="preserve">
+    <value>CFG scale</value>
+  </data>
+  <data name="Generation_WidthLabel.Text" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="Generation_HeightLabel.Text" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Generation_BackendStarting" xml:space="preserve">
+    <value>Backend starting...</value>
+  </data>
+  <data name="Generation_GenerateButtonLabel" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="Generation_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Generation_Error" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Generation_SeedMustBeInteger" xml:space="preserve">
+    <value>Seed must be an integer.</value>
+  </data>
+  <data name="Generation_Generating" xml:space="preserve">
+    <value>Generating... ({0:F1}s)</value>
+  </data>
+  <data name="Generation_NoImageReturned" xml:space="preserve">
+    <value>No image returned.</value>
+  </data>
+  <data name="Generation_Done" xml:space="preserve">
+    <value>Done ({0:F1}s)</value>
+  </data>
+</root>

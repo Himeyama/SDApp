@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sodalite (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Sodalite (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

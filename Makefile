@@ -1,4 +1,4 @@
-# SDApp のビルドオーケストレーション。
+# Sodalite のビルドオーケストレーション。
 # run.ps1 から呼び出され、変更のないターゲットはスキップする。
 # GnuWin32 make (3.81) を Windows 上で使うため、シェルは cmd に固定する。
 
@@ -6,14 +6,14 @@ SHELL := cmd
 .SHELLFLAGS := /c
 
 BACKEND_DIR := backend
-FRONTEND_DIR := frontend/SDApp
+FRONTEND_DIR := frontend/Sodalite
 
 BACKEND_SYNC_STAMP := $(BACKEND_DIR)/.venv/.sync-stamp
 BACKEND_PYPROJECT := $(BACKEND_DIR)/pyproject.toml
 BACKEND_LOCK := $(BACKEND_DIR)/uv.lock
 
-FRONTEND_EXE := $(FRONTEND_DIR)/bin/Debug/net9.0-windows10.0.26100.0/win-x64/SDApp.exe
-FRONTEND_CSPROJ := $(FRONTEND_DIR)/SDApp.csproj
+FRONTEND_EXE := $(FRONTEND_DIR)/bin/Debug/net9.0-windows10.0.26100.0/win-x64/Sodalite.exe
+FRONTEND_CSPROJ := $(FRONTEND_DIR)/Sodalite.csproj
 FRONTEND_SOURCES := $(wildcard $(FRONTEND_DIR)/*.cs) \
 	$(wildcard $(FRONTEND_DIR)/*.xaml) \
 	$(wildcard $(FRONTEND_DIR)/Views/*.cs) \
@@ -44,7 +44,7 @@ $(FRONTEND_EXE): $(FRONTEND_CSPROJ) $(FRONTEND_SOURCES)
 	cd $(FRONTEND_DIR) && dotnet build -c Debug
 
 run: all
-	@echo ==^> Launching SDApp
+	@echo ==^> Launching Sodalite
 	$(subst /,\,$(FRONTEND_EXE))
 
 # 配布用インストーラー (NSIS) をビルドする。要 NSIS (makensis) と pwsh (PowerShell 7+)。
