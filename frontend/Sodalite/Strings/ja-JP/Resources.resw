@@ -157,4 +157,10 @@
   <data name="Generation_Done" xml:space="preserve">
     <value>完了 ({0:F1}秒)</value>
   </data>
+  <data name="Generation_CopyImageMenuItem.Text" xml:space="preserve">
+    <value>画像をコピー</value>
+  </data>
+  <data name="Generation_SaveImageMenuItem.Text" xml:space="preserve">
+    <value>画像を保存...</value>
+  </data>
 </root>

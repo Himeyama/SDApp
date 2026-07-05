@@ -25,6 +25,7 @@ public sealed partial class MainWindow : Window
         Closed += MainWindow_Closed;
 
         GenerationPage generationPage = new();
+        generationPage.OwnerWindow = this;
         generationPage.StatusChanged += (_, status) => StatusBarTextBlock.Text = status;
         generationPage.DeviceInfoChanged += (_, deviceInfo) => StatusBarDeviceInfoTextBlock.Text = deviceInfo;
         generationPage.NotifyCurrentStatus();

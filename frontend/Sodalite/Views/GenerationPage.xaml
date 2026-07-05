@@ -82,7 +82,24 @@
             <Border Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     CornerRadius="8">
                 <Grid>
-                    <Image x:Name="ResultImageControl" Stretch="Uniform" Margin="8" />
+                    <Image x:Name="ResultImageControl" Stretch="Uniform" Margin="8">
+                        <Image.ContextFlyout>
+                            <MenuFlyout Opening="ResultImageFlyout_Opening">
+                                <MenuFlyoutItem x:Name="CopyImageMenuItem" x:Uid="Generation_CopyImageMenuItem"
+                                                Click="CopyImageMenuItem_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="Copy" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="SaveImageMenuItem" x:Uid="Generation_SaveImageMenuItem"
+                                                Click="SaveImageMenuItem_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="Save" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Image.ContextFlyout>
+                    </Image>
 
                     <Grid x:Name="SkeletonScreenGrid" Visibility="Collapsed" Margin="8"
                           SizeChanged="SkeletonScreenGrid_SizeChanged">

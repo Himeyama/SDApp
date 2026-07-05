@@ -32,6 +32,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     bool _isGenerating;
     bool _isBackendReady;
     BitmapImage? _resultImage;
+    byte[]? _resultImageBytes;
     List<string> _samplers = [];
     string _deviceInfo = "";
 
@@ -118,6 +119,13 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     {
         get => _resultImage;
         set => SetField(ref _resultImage, value);
+    }
+
+    /// <summary>表示中の画像の元 PNG バイト列。コピー・保存に使う。未生成時は null。</summary>
+    public byte[]? ResultImageBytes
+    {
+        get => _resultImageBytes;
+        set => SetField(ref _resultImageBytes, value);
     }
 
     public List<string> Samplers
@@ -225,6 +233,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
                 BitmapImage bitmap = new();
                 await bitmap.SetSourceAsync(stream);
+                ResultImageBytes = imageBytes;
                 ResultImage = bitmap;
                 StatusText = string.Format(ResourceLoader.GetString("Generation_Done"), elapsedSeconds);
             });

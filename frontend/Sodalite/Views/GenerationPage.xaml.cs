@@ -1,10 +1,16 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Sodalite.Services;
 using Sodalite.ViewModels;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
+using WinRT.Interop;
 
 namespace Sodalite.Views;
 
@@ -23,6 +29,9 @@ public sealed partial class GenerationPage : Page
     public event EventHandler<string>? StatusChanged;
 
     public event EventHandler<string>? DeviceInfoChanged;
+
+    /// <summary>FileSavePicker の初期化に使うオーナーウィンドウ。MainWindow から注入する。</summary>
+    internal Window? OwnerWindow { get; set; }
 
     public GenerationPage()
     {
@@ -135,6 +144,51 @@ public sealed partial class GenerationPage : Page
         {
             CfgScaleValueTextBlock.Text = e.NewValue.ToString("F1");
         }
+    }
+
+    void ResultImageFlyout_Opening(object? sender, object e)
+    {
+        bool hasImage = _viewModel.ResultImageBytes is not null;
+        CopyImageMenuItem.IsEnabled = hasImage;
+        SaveImageMenuItem.IsEnabled = hasImage;
+    }
+
+    async void CopyImageMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel.ResultImageBytes is not byte[] imageBytes)
+        {
+            return;
+        }
+
+        InMemoryRandomAccessStream stream = new();
+        await stream.WriteAsync(imageBytes.AsBuffer());
+        stream.Seek(0);
+
+        DataPackage dataPackage = new();
+        dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
+        Clipboard.SetContent(dataPackage);
+    }
+
+    async void SaveImageMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel.ResultImageBytes is not byte[] imageBytes || OwnerWindow is not Window ownerWindow)
+        {
+            return;
+        }
+
+        FileSavePicker picker = new();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(ownerWindow));
+        picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        picker.FileTypeChoices.Add("PNG", [".png"]);
+        picker.SuggestedFileName = $"sodalite_{DateTime.Now:yyyyMMdd_HHmmss}";
+
+        StorageFile? file = await picker.PickSaveFileAsync();
+        if (file is null)
+        {
+            return;
+        }
+
+        await FileIO.WriteBytesAsync(file, imageBytes);
     }
 
     void SkeletonScreenGrid_SizeChanged(object sender, SizeChangedEventArgs e) =>

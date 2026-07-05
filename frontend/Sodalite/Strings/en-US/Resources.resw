@@ -157,4 +157,10 @@
   <data name="Generation_Done" xml:space="preserve">
     <value>Done ({0:F1}s)</value>
   </data>
+  <data name="Generation_CopyImageMenuItem.Text" xml:space="preserve">
+    <value>Copy image</value>
+  </data>
+  <data name="Generation_SaveImageMenuItem.Text" xml:space="preserve">
+    <value>Save image...</value>
+  </data>
 </root>
