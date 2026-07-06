@@ -1,5 +1,7 @@
 """Tests for the generation and system API endpoints."""
 
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from sodalite_backend.schemas.generation import ModelInfo
@@ -26,6 +28,8 @@ def test_text_to_image_returns_completed_job(client: TestClient) -> None:
     body = response.json()
     assert body["status"] == "completed"
     assert body["image_url"].startswith("/api/v1/images/")
+    assert Path(body["image_path"]).is_absolute()
+    assert Path(body["image_path"]).name == body["image_url"].removeprefix("/api/v1/images/")
 
 
 def test_text_to_image_rejects_invalid_dimensions(client: TestClient) -> None:

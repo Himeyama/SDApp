@@ -40,6 +40,7 @@ class GenerationJob(BaseModel):
     current_step: int = 0
     total_steps: int = 0
     image_url: str | None = None
+    image_path: str | None = None
     error: str | None = None
 
 

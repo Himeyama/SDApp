@@ -189,4 +189,7 @@
   <data name="Generation_SaveImageMenuItem.Text" xml:space="preserve">
     <value>Save image...</value>
   </data>
+  <data name="Generation_OpenContainingFolderMenuItem.Text" xml:space="preserve">
+    <value>Open containing folder</value>
+  </data>
 </root>

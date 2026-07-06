@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -155,6 +156,7 @@ public sealed partial class GenerationPage : Page
         bool hasImage = _viewModel.ResultImageBytes is not null;
         CopyImageMenuItem.IsEnabled = hasImage;
         SaveImageMenuItem.IsEnabled = hasImage;
+        OpenContainingFolderMenuItem.IsEnabled = _viewModel.ResultImagePath is not null;
     }
 
     async void CopyImageMenuItem_Click(object sender, RoutedEventArgs e)
@@ -193,6 +195,21 @@ public sealed partial class GenerationPage : Page
         }
 
         await FileIO.WriteBytesAsync(file, imageBytes);
+    }
+
+    void OpenContainingFolderMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel.ResultImagePath is not string imagePath)
+        {
+            return;
+        }
+
+        using Process? process = Process.Start(new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            ArgumentList = { $"/select,{imagePath}" },
+            UseShellExecute = false,
+        });
     }
 
     void SkeletonScreenGrid_SizeChanged(object sender, SizeChangedEventArgs e) =>

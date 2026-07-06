@@ -34,6 +34,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     bool _isBackendReady;
     BitmapImage? _resultImage;
     byte[]? _resultImageBytes;
+    string? _resultImagePath;
     List<string> _samplers = [];
     string _deviceInfo = "";
 
@@ -129,6 +130,13 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     {
         get => _resultImageBytes;
         set => SetField(ref _resultImageBytes, value);
+    }
+
+    /// <summary>バックエンドが保存した画像の絶対パス。保存先フォルダを開く操作に使う。未生成時は null。</summary>
+    public string? ResultImagePath
+    {
+        get => _resultImagePath;
+        set => SetField(ref _resultImagePath, value);
     }
 
     public List<string> Samplers
@@ -242,6 +250,7 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                 BitmapImage bitmap = new();
                 await bitmap.SetSourceAsync(stream);
                 ResultImageBytes = imageBytes;
+                ResultImagePath = result.ImagePath;
                 ResultImage = bitmap;
                 StatusText = string.Format(ResourceLoader.GetString("Generation_Done"), elapsedSeconds);
             });

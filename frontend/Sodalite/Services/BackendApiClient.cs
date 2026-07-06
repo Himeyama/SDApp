@@ -39,7 +39,7 @@ sealed class BackendApiClient(int port) : IDisposable
             .ConfigureAwait(false)
             ?? throw new InvalidOperationException("Empty response from backend.");
 
-        return new GenerationResult(dto.JobId, dto.Status, dto.ImageUrl, dto.Error);
+        return new GenerationResult(dto.JobId, dto.Status, dto.ImageUrl, dto.ImagePath, dto.Error);
     }
 
     public async Task<byte[]> DownloadImageAsync(string imageUrl, CancellationToken ct) =>
@@ -131,6 +131,7 @@ sealed class BackendApiClient(int port) : IDisposable
         [property: JsonPropertyName("job_id")] string JobId,
         string Status,
         [property: JsonPropertyName("image_url")] string? ImageUrl,
+        [property: JsonPropertyName("image_path")] string? ImagePath,
         string? Error);
 
     sealed record HealthDto(

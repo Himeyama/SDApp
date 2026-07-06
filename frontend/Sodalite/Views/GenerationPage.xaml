@@ -97,6 +97,12 @@
                                         <SymbolIcon Symbol="Save" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="OpenContainingFolderMenuItem" x:Uid="Generation_OpenContainingFolderMenuItem"
+                                                Click="OpenContainingFolderMenuItem_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="Folder" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                             </MenuFlyout>
                         </Image.ContextFlyout>
                     </Image>

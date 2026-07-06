@@ -42,4 +42,5 @@ def create_text_to_image(request: Request, body: TextToImageRequest) -> Generati
         current_step=body.steps,
         total_steps=body.steps,
         image_url=f"/api/v1/images/{image_path.name}",
+        image_path=str(image_path.resolve()),
     )

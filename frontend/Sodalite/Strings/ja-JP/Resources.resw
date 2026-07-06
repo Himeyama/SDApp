@@ -189,4 +189,7 @@
   <data name="Generation_SaveImageMenuItem.Text" xml:space="preserve">
     <value>画像を保存...</value>
   </data>
+  <data name="Generation_OpenContainingFolderMenuItem.Text" xml:space="preserve">
+    <value>保存先フォルダーを開く</value>
+  </data>
 </root>
