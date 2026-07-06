@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Windows.ApplicationModel.Resources;
+using Sodalite.Models;
 using Sodalite.Services;
 using Sodalite.Views;
 
@@ -133,6 +134,7 @@ public sealed partial class MainWindow : Window
                 _generationPage.AttachBackend(_apiClient);
 
                 ModelSelectionButton.IsEnabled = true;
+                GalleryButton.IsEnabled = true;
             });
         }
         catch (UvNotFoundException)
@@ -197,6 +199,29 @@ public sealed partial class MainWindow : Window
 
     async void ModelSelectionPage_BackRequested(object? sender, EventArgs e) =>
         await SlideToPageAsync(_generationPage, reverse: true);
+
+    async void GalleryButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_apiClient is not BackendApiClient apiClient)
+        {
+            return;
+        }
+
+        GalleryPage page = new();
+        page.BackRequested += GalleryPage_BackRequested;
+        page.ReuseParametersRequested += GalleryPage_ReuseParametersRequested;
+        page.Initialize(apiClient);
+        await SlideToPageAsync(page, reverse: false);
+    }
+
+    async void GalleryPage_BackRequested(object? sender, EventArgs e) =>
+        await SlideToPageAsync(_generationPage, reverse: true);
+
+    async void GalleryPage_ReuseParametersRequested(object? sender, GalleryImageInfo image)
+    {
+        _generationPage.ApplyHistoryParameters(image);
+        await SlideToPageAsync(_generationPage, reverse: true);
+    }
 
     async void MainWindow_Closed(object sender, WindowEventArgs args)
     {

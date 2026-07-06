@@ -33,6 +33,45 @@ class TextToImageRequest(BaseModel):
     loras: list[LoraSpec] = Field(default_factory=list)
 
 
+class GalleryLoraInfo(BaseModel):
+    model_id: str
+    weight: float
+
+
+class GalleryParameters(BaseModel):
+    """Generation parameters read back from a PNG's embedded metadata.
+
+    Deliberately has no Field constraints (unlike TextToImageRequest): this
+    describes historical data that was already valid when generated, and must
+    keep loading even if future request validation ranges change.
+    """
+
+    prompt: str = ""
+    negative_prompt: str = ""
+    steps: int | None = None
+    cfg_scale: float | None = None
+    width: int | None = None
+    height: int | None = None
+    sampler: str | None = None
+    seed: int | None = None
+    loras: list[GalleryLoraInfo] = Field(default_factory=list)
+
+
+class GalleryImageInfo(BaseModel):
+    """A generated image found on disk, with its embedded generation parameters if present.
+
+    `parameters` is null when the PNG carries no Sodalite metadata (e.g. a file
+    placed into the output directory manually, or a build predating metadata
+    embedding).
+    """
+
+    image_id: str
+    image_url: str
+    image_path: str
+    created_at: float
+    parameters: GalleryParameters | None = None
+
+
 class GenerationJob(BaseModel):
     job_id: str
     status: JobStatus

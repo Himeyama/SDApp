@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Sodalite.Views.GalleryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Sodalite.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <Button x:Name="BackButton" x:Uid="GalleryPage_BackButton"
+                    Background="Transparent" BorderThickness="0" Padding="8"
+                    Click="BackButton_Click">
+                <FontIcon Glyph="&#xE72B;" FontSize="16" />
+            </Button>
+            <TextBlock x:Uid="GalleryPage_Title"
+                       Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+            <InfoBar Grid.Row="0" x:Name="ErrorInfoBar" Severity="Error" IsOpen="False"
+                     Margin="0,0,0,12" />
+
+            <Grid Grid.Row="1">
+                <ProgressRing x:Name="LoadingProgressRing" IsActive="False"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" Width="32" Height="32" />
+
+                <TextBlock x:Name="EmptyTextBlock" x:Uid="GalleryPage_Empty"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.6"
+                           Visibility="Collapsed" />
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <GridView x:Name="ImagesGridView" SelectionMode="None"
+                              IsItemClickEnabled="True" ItemClick="ImagesGridView_ItemClick">
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="local:GalleryImageItem">
+                                <Border Width="180" Height="180" CornerRadius="8"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <Image Source="{x:Bind Thumbnail}" Stretch="Uniform" Margin="4" />
+                                </Border>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

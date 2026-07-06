@@ -2,8 +2,9 @@
 
 from fastapi import APIRouter
 
-from sodalite_backend.api import generation, system
+from sodalite_backend.api import gallery, generation, system
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(system.router)
 api_router.include_router(generation.router)
+api_router.include_router(gallery.router)

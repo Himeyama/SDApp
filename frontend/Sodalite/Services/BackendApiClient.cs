@@ -12,6 +12,9 @@ sealed class BackendApiClient(int port) : IDisposable
         Timeout = TimeSpan.FromMinutes(10),
     };
 
+    /// <summary>サムネイル等、相対URLを完全URLに組み立てる呼び出し元向けに公開する。</summary>
+    public Uri BaseAddress => _http.BaseAddress!;
+
     public async Task<GenerationResult> GenerateTextToImageAsync(GenerationRequest request, CancellationToken ct)
     {
         List<LoraBody> loras = request.Loras?
@@ -84,6 +87,41 @@ sealed class BackendApiClient(int port) : IDisposable
         return dtos?.Select(dto => new LoraFileInfo(dto.LoraId, dto.SizeOnDiskBytes)).ToList() ?? [];
     }
 
+    public async Task<List<GalleryImageInfo>> GetGalleryImagesAsync(CancellationToken ct)
+    {
+        List<GalleryImageDto>? dtos = await _http
+            .GetFromJsonAsync<List<GalleryImageDto>>("/api/v1/gallery/images", ct)
+            .ConfigureAwait(false);
+
+        return dtos?.Select(ToGalleryImageInfo).ToList() ?? [];
+    }
+
+    public async Task DeleteGalleryImageAsync(string imageId, CancellationToken ct)
+    {
+        HttpResponseMessage response = await _http
+            .DeleteAsync($"/api/v1/gallery/images/{Uri.EscapeDataString(imageId)}", ct)
+            .ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+    }
+
+    static GalleryImageInfo ToGalleryImageInfo(GalleryImageDto dto) => new(
+        dto.ImageId,
+        dto.ImageUrl,
+        dto.ImagePath,
+        dto.CreatedAt,
+        dto.Parameters is GalleryParametersDto parameters
+            ? new GalleryParameters(
+                parameters.Prompt,
+                parameters.NegativePrompt,
+                parameters.Steps,
+                parameters.CfgScale,
+                parameters.Width,
+                parameters.Height,
+                parameters.Sampler,
+                parameters.Seed,
+                parameters.Loras.Select(lora => new LoraSelection(lora.ModelId, lora.Weight)).ToList())
+            : null);
+
     public async Task<ScanDirectories> GetScanDirectoriesAsync(CancellationToken ct)
     {
         ScanDirectoriesDto dto = await _http
@@ -138,6 +176,24 @@ sealed class BackendApiClient(int port) : IDisposable
         string Status,
         string Device,
         [property: JsonPropertyName("loaded_model")] string LoadedModel);
+
+    sealed record GalleryImageDto(
+        [property: JsonPropertyName("image_id")] string ImageId,
+        [property: JsonPropertyName("image_url")] string ImageUrl,
+        [property: JsonPropertyName("image_path")] string ImagePath,
+        [property: JsonPropertyName("created_at")] double CreatedAt,
+        GalleryParametersDto? Parameters);
+
+    sealed record GalleryParametersDto(
+        string Prompt,
+        [property: JsonPropertyName("negative_prompt")] string NegativePrompt,
+        int? Steps,
+        [property: JsonPropertyName("cfg_scale")] double? CfgScale,
+        int? Width,
+        int? Height,
+        string? Sampler,
+        long? Seed,
+        List<LoraBody> Loras);
 
     sealed record ModelDto(
         [property: JsonPropertyName("model_id")] string ModelId,

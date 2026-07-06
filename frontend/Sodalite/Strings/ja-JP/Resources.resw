@@ -192,4 +192,50 @@
   <data name="Generation_OpenContainingFolderMenuItem.Text" xml:space="preserve">
     <value>保存先フォルダーを開く</value>
   </data>
+
+  <data name="MainWindow_GalleryButtonLabel.Text" xml:space="preserve">
+    <value>ギャラリー</value>
+  </data>
+  <data name="GalleryPage_Title.Text" xml:space="preserve">
+    <value>生成履歴ギャラリー</value>
+  </data>
+  <data name="GalleryPage_BackButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>戻る</value>
+  </data>
+  <data name="GalleryPage_Empty.Text" xml:space="preserve">
+    <value>まだ生成履歴がありません。</value>
+  </data>
+  <data name="GalleryPage_LoadErrorTitle" xml:space="preserve">
+    <value>履歴の取得に失敗しました</value>
+  </data>
+  <data name="GalleryDetailDialog.CloseButtonText" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="GalleryDetailDialog_PromptLabel.Text" xml:space="preserve">
+    <value>プロンプト</value>
+  </data>
+  <data name="GalleryDetailDialog_NegativePromptLabel.Text" xml:space="preserve">
+    <value>ネガティブプロンプト</value>
+  </data>
+  <data name="GalleryDetailDialog_NoMetadata.Text" xml:space="preserve">
+    <value>このファイルには生成パラメータの情報がありません。</value>
+  </data>
+  <data name="GalleryDetailDialog_DeleteButton.Content" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="GalleryDetailDialog_ReuseButton.Content" xml:space="preserve">
+    <value>パラメータを再利用</value>
+  </data>
+  <data name="GalleryDetailDialog_OpenContainingFolderButton.Content" xml:space="preserve">
+    <value>保存先フォルダーを開く</value>
+  </data>
+  <data name="GalleryDetailDialog_DeleteConfirmMessage.Text" xml:space="preserve">
+    <value>この操作は取り消せません。</value>
+  </data>
+  <data name="GalleryDetailDialog_ConfirmDeleteButton.Content" xml:space="preserve">
+    <value>削除する</value>
+  </data>
+  <data name="GalleryDetailDialog_CancelDeleteButton.Content" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
 </root>

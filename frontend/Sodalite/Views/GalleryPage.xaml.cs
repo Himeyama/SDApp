@@ -1,0 +1,89 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Windows.ApplicationModel.Resources;
+using Sodalite.Models;
+using Sodalite.Services;
+using Sodalite.ViewModels;
+
+namespace Sodalite.Views;
+
+sealed partial class GalleryPage : Page
+{
+    static readonly ResourceLoader ResourceLoader = new();
+
+    readonly GalleryViewModel _viewModel;
+
+    BackendApiClient _apiClient = null!;
+
+    /// <summary>戻る操作が要求されたときに発火する。オーナー側で前の画面へ復帰させる。</summary>
+    public event EventHandler? BackRequested;
+
+    /// <summary>選択した履歴のパラメータを生成画面に反映するよう要求する。</summary>
+    public event EventHandler<GalleryImageInfo>? ReuseParametersRequested;
+
+    public GalleryPage()
+    {
+        InitializeComponent();
+        _viewModel = new GalleryViewModel(DispatcherQueue);
+    }
+
+    public async void Initialize(BackendApiClient apiClient)
+    {
+        _apiClient = apiClient;
+        await ReloadAsync();
+    }
+
+    async Task ReloadAsync()
+    {
+        ErrorInfoBar.IsOpen = false;
+        LoadingProgressRing.IsActive = true;
+
+        await _viewModel.LoadAsync(_apiClient, CancellationToken.None);
+
+        LoadingProgressRing.IsActive = false;
+        if (_viewModel.ErrorMessage is string error)
+        {
+            ErrorInfoBar.Title = ResourceLoader.GetString("GalleryPage_LoadErrorTitle");
+            ErrorInfoBar.Message = error;
+            ErrorInfoBar.IsOpen = true;
+        }
+
+        ImagesGridView.ItemsSource = _viewModel.Images
+            .Select(image =>
+            {
+                Uri thumbnailUri = new(_apiClient.BaseAddress, image.ImageUrl);
+                return new GalleryImageItem(image, thumbnailUri, new BitmapImage(thumbnailUri));
+            })
+            .ToList();
+        EmptyTextBlock.Visibility = _viewModel.Images.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    void BackButton_Click(object sender, RoutedEventArgs e) => BackRequested?.Invoke(this, EventArgs.Empty);
+
+    async void ImagesGridView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is not GalleryImageItem item)
+        {
+            return;
+        }
+
+        GalleryDetailDialog dialog = new(item.Image, item.Thumbnail) { XamlRoot = Content.XamlRoot };
+
+        dialog.ReuseRequested += (_, _) =>
+        {
+            dialog.Hide();
+            ReuseParametersRequested?.Invoke(this, item.Image);
+        };
+        dialog.DeleteConfirmed += async (_, _) =>
+        {
+            dialog.Hide();
+            await _viewModel.DeleteAsync(item.Image, CancellationToken.None);
+            await ReloadAsync();
+        };
+
+        await dialog.ShowAsync();
+    }
+}
+
+sealed record GalleryImageItem(GalleryImageInfo Image, Uri ThumbnailUri, BitmapImage Thumbnail);

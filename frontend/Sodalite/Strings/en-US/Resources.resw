@@ -192,4 +192,50 @@
   <data name="Generation_OpenContainingFolderMenuItem.Text" xml:space="preserve">
     <value>Open containing folder</value>
   </data>
+
+  <data name="MainWindow_GalleryButtonLabel.Text" xml:space="preserve">
+    <value>Gallery</value>
+  </data>
+  <data name="GalleryPage_Title.Text" xml:space="preserve">
+    <value>Generation history gallery</value>
+  </data>
+  <data name="GalleryPage_BackButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="GalleryPage_Empty.Text" xml:space="preserve">
+    <value>No generation history yet.</value>
+  </data>
+  <data name="GalleryPage_LoadErrorTitle" xml:space="preserve">
+    <value>Failed to load history</value>
+  </data>
+  <data name="GalleryDetailDialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="GalleryDetailDialog_PromptLabel.Text" xml:space="preserve">
+    <value>Prompt</value>
+  </data>
+  <data name="GalleryDetailDialog_NegativePromptLabel.Text" xml:space="preserve">
+    <value>Negative prompt</value>
+  </data>
+  <data name="GalleryDetailDialog_NoMetadata.Text" xml:space="preserve">
+    <value>This file has no generation parameter metadata.</value>
+  </data>
+  <data name="GalleryDetailDialog_DeleteButton.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="GalleryDetailDialog_ReuseButton.Content" xml:space="preserve">
+    <value>Reuse parameters</value>
+  </data>
+  <data name="GalleryDetailDialog_OpenContainingFolderButton.Content" xml:space="preserve">
+    <value>Open containing folder</value>
+  </data>
+  <data name="GalleryDetailDialog_DeleteConfirmMessage.Text" xml:space="preserve">
+    <value>This action cannot be undone.</value>
+  </data>
+  <data name="GalleryDetailDialog_ConfirmDeleteButton.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="GalleryDetailDialog_CancelDeleteButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

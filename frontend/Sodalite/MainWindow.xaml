@@ -47,10 +47,15 @@
 
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
-                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="1"
+                <HyperlinkButton x:Name="GalleryButton" Grid.Column="1"
+                                 Padding="0,0,16,0" IsEnabled="False" Click="GalleryButton_Click">
+                    <TextBlock x:Uid="MainWindow_GalleryButtonLabel"
+                               Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
+                </HyperlinkButton>
+                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="2"
                                  Padding="0" IsEnabled="False" Click="ModelSelectionButton_Click">
                     <TextBlock x:Name="StatusBarDeviceInfoTextBlock"
                                Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />

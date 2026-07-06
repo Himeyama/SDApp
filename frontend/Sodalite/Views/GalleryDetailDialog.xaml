@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Sodalite.Views.GalleryDetailDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="GalleryDetailDialog_Loaded"
+    x:Uid="GalleryDetailDialog">
+
+    <!-- ContentDialog はコンテンツの必要サイズで測るため *(可変高)行は 0 に潰れる。
+         画像プレビュー・パラメータ一覧とも Auto/MaxHeight で明示する。 -->
+    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="240,Auto" ColumnSpacing="16" MaxWidth="640">
+        <Border Grid.Row="0" Grid.Column="0" Width="240" Height="240" CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <Image x:Name="PreviewImage" Stretch="Uniform" Margin="4" />
+        </Border>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" MaxHeight="240" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="ParametersPanel" Spacing="8" MinWidth="280">
+                <TextBlock x:Name="NoMetadataTextBlock" x:Uid="GalleryDetailDialog_NoMetadata"
+                           Opacity="0.6" TextWrapping="Wrap" Visibility="Collapsed" />
+
+                <StackPanel x:Name="PromptPanel" Spacing="2">
+                    <TextBlock x:Uid="GalleryDetailDialog_PromptLabel" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
+                    <TextBlock x:Name="PromptTextBlock" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel x:Name="NegativePromptPanel" Spacing="2">
+                    <TextBlock x:Uid="GalleryDetailDialog_NegativePromptLabel" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
+                    <TextBlock x:Name="NegativePromptTextBlock" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <TextBlock x:Name="SettingsTextBlock" TextWrapping="Wrap" Opacity="0.85" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
+                    Spacing="8" Margin="0,16,0,0">
+            <Button x:Name="ReuseButton" x:Uid="GalleryDetailDialog_ReuseButton" Click="ReuseButton_Click" />
+            <Button x:Name="OpenContainingFolderButton" x:Uid="GalleryDetailDialog_OpenContainingFolderButton"
+                    Click="OpenContainingFolderButton_Click" />
+        </StackPanel>
+
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,12,0,0">
+            <Button x:Name="DeleteButton" x:Uid="GalleryDetailDialog_DeleteButton"
+                    Click="DeleteButton_Click" Visibility="Visible" />
+
+            <StackPanel x:Name="DeleteConfirmPanel" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+                <TextBlock x:Uid="GalleryDetailDialog_DeleteConfirmMessage" VerticalAlignment="Center" Opacity="0.8" />
+                <Button x:Name="ConfirmDeleteButton" x:Uid="GalleryDetailDialog_ConfirmDeleteButton"
+                        Style="{ThemeResource AccentButtonStyle}" Click="ConfirmDeleteButton_Click" />
+                <Button x:Name="CancelDeleteButton" x:Uid="GalleryDetailDialog_CancelDeleteButton"
+                        Click="CancelDeleteButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</ContentDialog>

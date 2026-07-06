@@ -6,6 +6,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.ApplicationModel.Resources;
+using Sodalite.Models;
 using Sodalite.Services;
 using Sodalite.ViewModels;
 using Windows.ApplicationModel.DataTransfer;
@@ -70,6 +71,53 @@ public sealed partial class GenerationPage : Page
 
     internal Task RefreshDeviceInfoAsync(BackendApiClient apiClient) =>
         _viewModel.RefreshDeviceInfoAsync(apiClient, CancellationToken.None);
+
+    /// <summary>ギャラリーで選択した履歴のパラメータを入力欄・LoRA選択に復元する。
+    /// GenerateButton_Click は「コントロール値→ViewModel」の一方向同期のため、ViewModel
+    /// プロパティではなくコントロール自体の値を更新する(そうしないと表示に反映されない)。</summary>
+    internal void ApplyHistoryParameters(GalleryImageInfo image)
+    {
+        if (image.Parameters is not GalleryParameters parameters)
+        {
+            return;
+        }
+
+        PromptTextBox.Text = parameters.Prompt;
+        NegativePromptTextBox.Text = parameters.NegativePrompt;
+
+        if (parameters.Steps is int steps)
+        {
+            StepsSlider.Value = steps;
+        }
+
+        if (parameters.CfgScale is double cfgScale)
+        {
+            CfgScaleSlider.Value = cfgScale;
+        }
+
+        if (parameters.Width is int width)
+        {
+            WidthNumberBox.Value = width;
+        }
+
+        if (parameters.Height is int height)
+        {
+            HeightNumberBox.Value = height;
+        }
+
+        SeedTextBox.Text = parameters.Seed?.ToString() ?? "";
+
+        if (parameters.Sampler is string sampler && _viewModel.Samplers.Contains(sampler))
+        {
+            SamplerComboBox.SelectedItem = sampler;
+        }
+
+        _viewModel.SelectedLoras.Clear();
+        foreach (LoraSelection lora in parameters.Loras)
+        {
+            _viewModel.SelectedLoras.Add(new SelectedLoraViewModel(lora.ModelId) { Weight = lora.Weight });
+        }
+    }
 
     void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
