@@ -12,6 +12,7 @@ Stable Diffusion 画像生成デスクトップアプリ。一から独自実装
 
 ## ダウンロードとインストール
 
+- GPU: VRAM 12 GiB 以上が推奨です。(VRAM 10 GiB でも一応動作します)
 - `uv` コマンドの Windows 版インストールが必要です。  
   https://docs.astral.sh/uv/#installation
 

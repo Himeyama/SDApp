@@ -12,6 +12,7 @@ A Stable Diffusion image-generation desktop app, built from scratch as an origin
 
 ## Download and install
 
+- GPU: 12 GiB or more of VRAM is recommended. (It can also run with 10 GiB of VRAM.)
 - You need the Windows build of the `uv` command installed.  
   https://docs.astral.sh/uv/#installation
 
