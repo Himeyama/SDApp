@@ -226,8 +226,14 @@
   <data name="GalleryDetailDialog_ReuseButton.Content" xml:space="preserve">
     <value>Reuse parameters</value>
   </data>
+  <data name="GalleryDetailDialog_OpenImageButton.Content" xml:space="preserve">
+    <value>Open image</value>
+  </data>
   <data name="GalleryDetailDialog_OpenContainingFolderButton.Content" xml:space="preserve">
     <value>Open containing folder</value>
+  </data>
+  <data name="GalleryImagePreviewDialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
   </data>
   <data name="GalleryDetailDialog_DeleteConfirmMessage.Text" xml:space="preserve">
     <value>This action cannot be undone.</value>

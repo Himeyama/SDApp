@@ -87,6 +87,28 @@ sealed partial class GalleryDetailDialog : ContentDialog
 
     void ReuseButton_Click(object sender, RoutedEventArgs e) => ReuseRequested?.Invoke(this, EventArgs.Empty);
 
+    async void PreviewImageButton_Click(object sender, RoutedEventArgs e)
+    {
+        // ContentDialog は同じ XamlRoot 上に同時に1つしか表示できず、表示中のまま
+        // 別の ContentDialog を ShowAsync すると例外でアプリごと落ちる。
+        // そのため一旦自分を閉じてからプレビューを表示し、閉じられたら自分を開き直す。
+        Hide();
+
+        GalleryImagePreviewDialog previewDialog = new(_thumbnail) { XamlRoot = XamlRoot };
+        await previewDialog.ShowAsync();
+
+        await ShowAsync();
+    }
+
+    void OpenImageButton_Click(object sender, RoutedEventArgs e)
+    {
+        using Process? process = Process.Start(new ProcessStartInfo
+        {
+            FileName = _image.ImagePath,
+            UseShellExecute = true,
+        });
+    }
+
     void OpenContainingFolderButton_Click(object sender, RoutedEventArgs e)
     {
         using Process? process = Process.Start(new ProcessStartInfo

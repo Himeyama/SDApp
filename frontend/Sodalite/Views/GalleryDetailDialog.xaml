@@ -7,38 +7,51 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Loaded="GalleryDetailDialog_Loaded"
+    CornerRadius="8"
     x:Uid="GalleryDetailDialog">
 
     <!-- ContentDialog はコンテンツの必要サイズで測るため *(可変高)行は 0 に潰れる。
          画像プレビュー・パラメータ一覧とも Auto/MaxHeight で明示する。 -->
-    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="240,Auto" ColumnSpacing="16" MaxWidth="640">
-        <Border Grid.Row="0" Grid.Column="0" Width="240" Height="240" CornerRadius="8"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-            <Image x:Name="PreviewImage" Stretch="Uniform" Margin="4" />
-        </Border>
+    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="240,Auto" ColumnSpacing="16" Width="640">
+        <Button Grid.Row="0" Grid.Column="0" Width="240" Height="240" Padding="0"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderThickness="0" CornerRadius="8"
+                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                x:Uid="GalleryDetailDialog_PreviewImageButton"
+                Click="PreviewImageButton_Click">
+            <Grid>
+                <Image x:Name="PreviewImage" Stretch="Uniform" Margin="4" />
+                <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10"
+                        Padding="6" CornerRadius="6" Background="#99000000">
+                    <FontIcon Glyph="&#xE740;" FontSize="16" Foreground="White" />
+                </Border>
+            </Grid>
+        </Button>
 
         <ScrollViewer Grid.Row="0" Grid.Column="1" MaxHeight="240" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="ParametersPanel" Spacing="8" MinWidth="280">
+            <StackPanel x:Name="ParametersPanel" Spacing="8" Width="376">
                 <TextBlock x:Name="NoMetadataTextBlock" x:Uid="GalleryDetailDialog_NoMetadata"
                            Opacity="0.6" TextWrapping="Wrap" Visibility="Collapsed" />
 
                 <StackPanel x:Name="PromptPanel" Spacing="2">
                     <TextBlock x:Uid="GalleryDetailDialog_PromptLabel" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
-                    <TextBlock x:Name="PromptTextBlock" TextWrapping="Wrap" />
+                    <TextBlock x:Name="PromptTextBlock" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
                 </StackPanel>
 
                 <StackPanel x:Name="NegativePromptPanel" Spacing="2">
                     <TextBlock x:Uid="GalleryDetailDialog_NegativePromptLabel" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
-                    <TextBlock x:Name="NegativePromptTextBlock" TextWrapping="Wrap" />
+                    <TextBlock x:Name="NegativePromptTextBlock" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
                 </StackPanel>
 
-                <TextBlock x:Name="SettingsTextBlock" TextWrapping="Wrap" Opacity="0.85" />
+                <TextBlock x:Name="SettingsTextBlock" TextWrapping="Wrap" Opacity="0.85" IsTextSelectionEnabled="True" />
             </StackPanel>
         </ScrollViewer>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
                     Spacing="8" Margin="0,16,0,0">
             <Button x:Name="ReuseButton" x:Uid="GalleryDetailDialog_ReuseButton" Click="ReuseButton_Click" />
+            <Button x:Name="OpenImageButton" x:Uid="GalleryDetailDialog_OpenImageButton"
+                    Click="OpenImageButton_Click" />
             <Button x:Name="OpenContainingFolderButton" x:Uid="GalleryDetailDialog_OpenContainingFolderButton"
                     Click="OpenContainingFolderButton_Click" />
         </StackPanel>
