@@ -9,6 +9,7 @@ A Stable Diffusion image-generation desktop app, built from scratch as an origin
 - **Frontend**: WinUI3 (.NET 9 / Windows App SDK)
 - **Backend**: Python 3.13+ / FastAPI / diffusers (managed with uv)
 - **Communication**: The frontend launches the backend as a local subprocess and talks to it over HTTP.
+- The safety checker is disabled, so 🔞NSFW image generation is possible. Users are responsible for how generated content is used or shared, and must comply with the license of the model in use and the laws of their jurisdiction.
 
 ## Download and install
 
