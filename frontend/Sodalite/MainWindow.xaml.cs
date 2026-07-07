@@ -15,6 +15,8 @@ public sealed partial class MainWindow : Window
 
     readonly BackendProcessManager _backendProcessManager = new(BackendLocator.BackendProjectPath);
     readonly GenerationPage _generationPage;
+    readonly SystemMonitorService _systemMonitorService = new();
+    readonly DispatcherTimer _systemStatsTimer;
     BackendApiClient? _apiClient;
 
     public MainWindow()
@@ -38,7 +40,41 @@ public sealed partial class MainWindow : Window
 
         RootHost.Children.Add(_generationPage);
 
+        _systemStatsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _systemStatsTimer.Tick += SystemStatsTimer_Tick;
+        _systemStatsTimer.Start();
+
         _ = StartBackendAsync();
+    }
+
+    async void SystemStatsTimer_Tick(object? sender, object e)
+    {
+        SystemStats stats = await _systemMonitorService.GetStatsAsync().ConfigureAwait(true);
+
+        SystemStatsPanel.Visibility = Visibility.Visible;
+        CpuUsageTextBlock.Text = $"{stats.CpuUsagePercent:F0}%";
+        MemoryUsageTextBlock.Text =
+            $"{stats.MemoryUsedGiB:F1} / {stats.MemoryTotalGiB:F1} GiB";
+
+        if (stats.GpuUsagePercent is double gpuPercent)
+        {
+            GpuStatsPanel.Visibility = Visibility.Visible;
+            GpuUsageTextBlock.Text = $"{gpuPercent:F0}%";
+        }
+        else
+        {
+            GpuStatsPanel.Visibility = Visibility.Collapsed;
+        }
+
+        if (stats.VramUsedGiB is double vramUsedGiB && stats.VramTotalGiB is double vramTotalGiB)
+        {
+            VramStatsPanel.Visibility = Visibility.Visible;
+            VramUsageTextBlock.Text = $"{vramUsedGiB:F1} / {vramTotalGiB:F1} GiB";
+        }
+        else
+        {
+            VramStatsPanel.Visibility = Visibility.Collapsed;
+        }
     }
 
     /// <summary>横スライドの移動量(px)。画面幅ぶんではなく控えめに動かして自然に見せる。</summary>
@@ -225,6 +261,7 @@ public sealed partial class MainWindow : Window
 
     async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        _systemStatsTimer.Stop();
         _apiClient?.Dispose();
         await _backendProcessManager.DisposeAsync();
     }

@@ -47,15 +47,52 @@
 
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
-            <Grid ColumnDefinitions="*,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                 <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
-                <HyperlinkButton x:Name="GalleryButton" Grid.Column="1"
+
+                <StackPanel x:Name="SystemStatsPanel" Grid.Column="1" Orientation="Horizontal"
+                            Spacing="12" Margin="0,0,16,0" Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="4" Opacity="0.7"
+                                ToolTipService.ToolTip="CPU">
+                        <FontIcon Glyph="&#xE950;" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock x:Name="CpuUsageTextBlock" Width="32"
+                                   TextAlignment="Right"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4" Opacity="0.7"
+                                ToolTipService.ToolTip="Memory">
+                        <FontIcon Glyph="&#xEEA1;" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock x:Name="MemoryUsageTextBlock" Width="88"
+                                   TextAlignment="Right"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel x:Name="GpuStatsPanel" Orientation="Horizontal" Spacing="4"
+                                Opacity="0.7" Visibility="Collapsed" ToolTipService.ToolTip="GPU">
+                        <FontIcon Glyph="&#xE7F4;" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock x:Name="GpuUsageTextBlock" Width="32"
+                                   TextAlignment="Right"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel x:Name="VramStatsPanel" Orientation="Horizontal" Spacing="4"
+                                Opacity="0.7" Visibility="Collapsed" ToolTipService.ToolTip="VRAM">
+                        <FontIcon Glyph="&#xE9D9;" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock x:Name="VramUsageTextBlock" Width="88"
+                                   TextAlignment="Right"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+
+                <HyperlinkButton x:Name="GalleryButton" Grid.Column="2"
                                  Padding="0" Margin="0,0,16,0" IsEnabled="False" Click="GalleryButton_Click">
                     <TextBlock x:Uid="MainWindow_GalleryButtonLabel"
                                Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
                 </HyperlinkButton>
-                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="2"
+                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="3"
                                  Padding="0" IsEnabled="False" Click="ModelSelectionButton_Click">
                     <TextBlock x:Name="StatusBarDeviceInfoTextBlock"
                                Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />
