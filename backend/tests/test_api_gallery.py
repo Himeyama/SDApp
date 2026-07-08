@@ -6,10 +6,13 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 
-def _generate_one(client: TestClient, prompt: str = "a cat") -> dict:
+def _generate_one(client: TestClient, wait_for_job_done, prompt: str = "a cat") -> dict:
     response = client.post("/api/v1/generations/text-to-image", json={"prompt": prompt, "steps": 4})
     assert response.status_code == 200
-    return response.json()
+    job_id = response.json()["job_id"]
+    job = wait_for_job_done(client, job_id)
+    assert job["status"] == "completed"
+    return job
 
 
 def test_list_images_empty_when_no_outputs(client: TestClient) -> None:
@@ -18,8 +21,10 @@ def test_list_images_empty_when_no_outputs(client: TestClient) -> None:
     assert response.json() == []
 
 
-def test_list_images_returns_generated_image_with_parameters(client: TestClient) -> None:
-    job = _generate_one(client, prompt="a cat wearing sunglasses")
+def test_list_images_returns_generated_image_with_parameters(
+    client: TestClient, wait_for_job_done
+) -> None:
+    job = _generate_one(client, wait_for_job_done, prompt="a cat wearing sunglasses")
 
     response = client.get("/api/v1/gallery/images")
 
@@ -30,9 +35,9 @@ def test_list_images_returns_generated_image_with_parameters(client: TestClient)
     assert body[0]["parameters"]["prompt"] == "a cat wearing sunglasses"
 
 
-def test_list_images_sorted_newest_first(client: TestClient) -> None:
-    _generate_one(client, prompt="first")
-    _generate_one(client, prompt="second")
+def test_list_images_sorted_newest_first(client: TestClient, wait_for_job_done) -> None:
+    _generate_one(client, wait_for_job_done, prompt="first")
+    _generate_one(client, wait_for_job_done, prompt="second")
 
     body = client.get("/api/v1/gallery/images").json()
 
@@ -60,8 +65,10 @@ def test_list_images_includes_file_without_metadata(client: TestClient, tmp_path
     assert body[0]["parameters"] is None
 
 
-def test_delete_image_removes_file(client: TestClient, tmp_path: Path) -> None:
-    job = _generate_one(client)
+def test_delete_image_removes_file(
+    client: TestClient, tmp_path: Path, wait_for_job_done
+) -> None:
+    job = _generate_one(client, wait_for_job_done)
     image_id = job["image_url"].removeprefix("/api/v1/images/")
 
     response = client.delete(f"/api/v1/gallery/images/{image_id}")

@@ -14,6 +14,7 @@ sealed record GalleryParameters(
     double? CfgScale,
     int? Width,
     int? Height,
+    int? BatchSize,
     string? Sampler,
     long? Seed,
     IReadOnlyList<LoraSelection> Loras);

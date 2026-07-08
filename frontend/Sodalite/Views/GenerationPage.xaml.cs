@@ -28,6 +28,7 @@ public sealed partial class GenerationPage : Page
 
     int _backendStartingSpinnerIndex;
     double _skeletonAspectRatio = 1.0;
+    bool _isSkeletonScreenEnabled = true;
 
     public event EventHandler<string>? StatusChanged;
 
@@ -105,6 +106,11 @@ public sealed partial class GenerationPage : Page
             HeightNumberBox.Value = height;
         }
 
+        if (parameters.BatchSize is int batchSize)
+        {
+            BatchSizeNumberBox.Value = batchSize;
+        }
+
         SeedTextBox.Text = parameters.Seed?.ToString() ?? "";
 
         if (parameters.Sampler is string sampler && _viewModel.Samplers.Contains(sampler))
@@ -116,6 +122,32 @@ public sealed partial class GenerationPage : Page
         foreach (LoraSelection lora in parameters.Loras)
         {
             _viewModel.SelectedLoras.Add(new SelectedLoraViewModel(lora.ModelId) { Weight = lora.Weight });
+        }
+    }
+
+    /// <summary>生成中に表示するスケルトンスクリーンのオン・オフを切り替え、切替後の状態を返す。
+    /// オフの場合、生成中も直近の生成結果画像を表示し続ける。</summary>
+    internal bool ToggleSkeletonScreen()
+    {
+        _isSkeletonScreenEnabled = !_isSkeletonScreenEnabled;
+        UpdateResultAreaVisibility();
+        return _isSkeletonScreenEnabled;
+    }
+
+    void UpdateResultAreaVisibility()
+    {
+        bool showSkeleton = _viewModel.IsGenerating && _isSkeletonScreenEnabled;
+
+        ResultImageControl.Visibility = showSkeleton ? Visibility.Collapsed : Visibility.Visible;
+        SkeletonScreenGrid.Visibility = showSkeleton ? Visibility.Visible : Visibility.Collapsed;
+
+        if (showSkeleton)
+        {
+            SkeletonShimmerStoryboard.Begin();
+        }
+        else
+        {
+            SkeletonShimmerStoryboard.Stop();
         }
     }
 
@@ -140,17 +172,10 @@ public sealed partial class GenerationPage : Page
                 break;
             case nameof(GenerationViewModel.IsGenerating):
                 GenerateButton.IsEnabled = _viewModel.IsBackendReady && !_viewModel.IsGenerating;
-                ResultImageControl.Visibility = _viewModel.IsGenerating ? Visibility.Collapsed : Visibility.Visible;
-                SkeletonScreenGrid.Visibility = _viewModel.IsGenerating ? Visibility.Visible : Visibility.Collapsed;
-                if (_viewModel.IsGenerating)
-                {
-                    SkeletonShimmerStoryboard.Begin();
-                }
-                else
-                {
-                    SkeletonShimmerStoryboard.Stop();
-                }
-
+                GenerateButton.Visibility = _viewModel.IsGenerating ? Visibility.Collapsed : Visibility.Visible;
+                CancelButton.Visibility = _viewModel.IsGenerating ? Visibility.Visible : Visibility.Collapsed;
+                CancelButton.IsEnabled = _viewModel.IsGenerating;
+                UpdateResultAreaVisibility();
                 break;
             case nameof(GenerationViewModel.Samplers):
                 SamplerComboBox.ItemsSource = _viewModel.Samplers;
@@ -174,6 +199,7 @@ public sealed partial class GenerationPage : Page
         _viewModel.CfgScale = CfgScaleSlider.Value;
         _viewModel.Width = (int)WidthNumberBox.Value;
         _viewModel.Height = (int)HeightNumberBox.Value;
+        _viewModel.BatchSize = (int)BatchSizeNumberBox.Value;
         _viewModel.Sampler = SamplerComboBox.SelectedItem as string ?? _viewModel.Sampler;
         _viewModel.SeedText = SeedTextBox.Text;
 
@@ -181,6 +207,12 @@ public sealed partial class GenerationPage : Page
         UpdateSkeletonScreenSize(SkeletonScreenGrid.ActualSize.X, SkeletonScreenGrid.ActualSize.Y);
 
         await _viewModel.GenerateAsync(CancellationToken.None);
+    }
+
+    async void CancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        CancelButton.IsEnabled = false;
+        await _viewModel.CancelAsync(CancellationToken.None);
     }
 
     void StepsSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)

@@ -65,6 +65,9 @@
   <data name="MainWindow_TitleBarText.Text" xml:space="preserve">
     <value>Sodalite</value>
   </data>
+  <data name="MainWindow_SkeletonScreenToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Toggle the skeleton screen shown while generating (when off, the latest result stays visible instead).</value>
+  </data>
   <data name="MainWindow_BackendFailedToStart" xml:space="preserve">
     <value>Backend failed to start: {0}</value>
   </data>
@@ -107,10 +110,10 @@
     <value>Choose folder</value>
   </data>
   <data name="ModelSelectionPage_ChooseModelDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Choose the folder that holds your models (subfolders are scanned recursively).</value>
+    <value>Choose the folder that holds your models (only files directly in this folder are scanned).</value>
   </data>
   <data name="ModelSelectionPage_ChooseLoraDirButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Choose the folder that holds your LoRA files (subfolders are scanned recursively).</value>
+    <value>Choose the folder that holds your LoRA files (only files directly in this folder are scanned).</value>
   </data>
   <data name="ModelSelectionPage_ModelDirUnset.Text" xml:space="preserve">
     <value>No model folder set. Choose one with the "Choose folder" button on the right.</value>
@@ -159,6 +162,9 @@
   <data name="Generation_HeightLabel.Text" xml:space="preserve">
     <value>Height</value>
   </data>
+  <data name="Generation_BatchSizeLabel.Text" xml:space="preserve">
+    <value>Batch size</value>
+  </data>
   <data name="Generation_BackendStarting" xml:space="preserve">
     <value>Backend starting...</value>
   </data>
@@ -177,11 +183,23 @@
   <data name="Generation_Generating" xml:space="preserve">
     <value>Generating... ({0:F1}s)</value>
   </data>
+  <data name="Generation_GeneratingBatch" xml:space="preserve">
+    <value>Generating... {0}/{1} ({2:F1} s, {3:F1} s, {4:F1} s/image)</value>
+  </data>
   <data name="Generation_NoImageReturned" xml:space="preserve">
     <value>No image returned.</value>
   </data>
   <data name="Generation_Done" xml:space="preserve">
     <value>Done ({0:F1}s)</value>
+  </data>
+  <data name="Generation_Cancelling" xml:space="preserve">
+    <value>Cancelling...</value>
+  </data>
+  <data name="Generation_Cancelled" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="Generation_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
   </data>
   <data name="Generation_CopyImageMenuItem.Text" xml:space="preserve">
     <value>Copy image</value>

@@ -14,6 +14,8 @@ namespace Sodalite.ViewModels;
 
 sealed class GenerationViewModel : INotifyPropertyChanged
 {
+    static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(400);
+
     static readonly ResourceLoader ResourceLoader = new();
 
     readonly DispatcherQueue _dispatcherQueue;
@@ -21,12 +23,17 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
     BackendApiClient? _apiClient;
     Stopwatch _generatingStopwatch = new();
+    Stopwatch _batchStopwatch = new();
+    string? _runningJobId;
+    int _batchImagesCompleted;
+    int _batchTotalImages;
     string _prompt = "";
     string _negativePrompt = "";
     int _steps = 20;
     double _cfgScale = 7.0;
     int _width = 1024;
     int _height = 1024;
+    int _batchSize = 1;
     string _sampler = "euler_a";
     string _seedText = "";
     string _statusText = ResourceLoader.GetString("Generation_BackendStarting");
@@ -46,8 +53,31 @@ sealed class GenerationViewModel : INotifyPropertyChanged
 
         _generatingElapsedTimer = dispatcherQueue.CreateTimer();
         _generatingElapsedTimer.Interval = TimeSpan.FromMilliseconds(100);
-        _generatingElapsedTimer.Tick += (_, _) =>
+        _generatingElapsedTimer.Tick += (_, _) => UpdateGeneratingStatusText();
+    }
+
+    /// <summary>生成中のステータス文言を組み立てる。バッチ枚数が1のときは単純な経過秒数のみ、
+    /// 2枚以上のときは現在の番号・現在の画像の経過秒・バッチ全体の累計秒・平均秒を表示する。</summary>
+    void UpdateGeneratingStatusText()
+    {
+        if (_batchTotalImages <= 1)
+        {
             StatusText = string.Format(ResourceLoader.GetString("Generation_Generating"), _generatingStopwatch.Elapsed.TotalSeconds);
+            return;
+        }
+
+        int currentImageNumber = Math.Min(_batchImagesCompleted + 1, _batchTotalImages);
+        double currentImageSeconds = _generatingStopwatch.Elapsed.TotalSeconds;
+        double totalSeconds = _batchStopwatch.Elapsed.TotalSeconds;
+        double averageSeconds = _batchImagesCompleted > 0 ? totalSeconds / _batchImagesCompleted : currentImageSeconds;
+
+        StatusText = string.Format(
+            ResourceLoader.GetString("Generation_GeneratingBatch"),
+            currentImageNumber,
+            _batchTotalImages,
+            currentImageSeconds,
+            totalSeconds,
+            averageSeconds);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -86,6 +116,12 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     {
         get => _height;
         set => SetField(ref _height, value);
+    }
+
+    public int BatchSize
+    {
+        get => _batchSize;
+        set => SetField(ref _batchSize, value);
     }
 
     public string Sampler
@@ -188,6 +224,9 @@ sealed class GenerationViewModel : INotifyPropertyChanged
     static string DisplayNameFor(string modelId) =>
         Path.Exists(modelId) ? Path.GetFileNameWithoutExtension(modelId) : modelId;
 
+    /// <summary>画像が1枚完成するたびに発火する。ギャラリー等、他画面への反映に使う。</summary>
+    public event EventHandler? ImageCompleted;
+
     public async Task GenerateAsync(CancellationToken ct)
     {
         if (_apiClient is not BackendApiClient apiClient || string.IsNullOrWhiteSpace(Prompt) || IsGenerating)
@@ -202,9 +241,9 @@ sealed class GenerationViewModel : INotifyPropertyChanged
         }
 
         IsGenerating = true;
-        _generatingStopwatch = Stopwatch.StartNew();
+        _batchImagesCompleted = 0;
+        _batchTotalImages = BatchSize;
         StatusText = string.Format(ResourceLoader.GetString("Generation_Generating"), 0.0);
-        _generatingElapsedTimer.Start();
 
         try
         {
@@ -219,29 +258,100 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                 CfgScale,
                 Width,
                 Height,
+                BatchSize,
                 Sampler,
                 seed,
                 loras);
 
-            GenerationResult result = await apiClient.GenerateTextToImageAsync(request, ct).ConfigureAwait(false);
+            GenerationResult started = await apiClient.StartTextToImageAsync(request, ct).ConfigureAwait(false);
+            _runningJobId = started.JobId;
 
-            if (result.Error is not null)
+            await PollUntilDoneAsync(apiClient, started.JobId, ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), ex.Message));
+        }
+        finally
+        {
+            _runningJobId = null;
+
+            // ConfigureAwait(false) 後はスレッドプール上で実行され得るため、経過時間タイマーを
+            // 所有する UI スレッド上でまとめて停止・状態解除する。
+            _dispatcherQueue.TryEnqueue(() =>
             {
-                _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), result.Error));
-                return;
+                _generatingElapsedTimer.Stop();
+                _generatingStopwatch.Stop();
+                _batchStopwatch.Stop();
+                IsGenerating = false;
+            });
+        }
+    }
+
+    /// <summary>実行中の生成ジョブをキャンセルする。次に生成予定だった画像の開始前に反映される。</summary>
+    public async Task CancelAsync(CancellationToken ct)
+    {
+        if (_apiClient is not BackendApiClient apiClient || _runningJobId is not string jobId)
+        {
+            return;
+        }
+
+        StatusText = ResourceLoader.GetString("Generation_Cancelling");
+        await apiClient.CancelGenerationJobAsync(jobId, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>ジョブが完了するまでポーリングし、完成画像が増えるたびに 1 枚ずつ表示・秒数リセットする。</summary>
+    async Task PollUntilDoneAsync(BackendApiClient apiClient, string jobId, CancellationToken ct)
+    {
+        int lastImagesCompleted = 0;
+        _generatingStopwatch = Stopwatch.StartNew();
+        _batchStopwatch = Stopwatch.StartNew();
+        _dispatcherQueue.TryEnqueue(() => _generatingElapsedTimer.Start());
+
+        while (true)
+        {
+            GenerationResult result = await apiClient.GetGenerationJobAsync(jobId, ct).ConfigureAwait(false);
+
+            if (result.ImagesCompleted > lastImagesCompleted && result.ImageUrl is string imageUrl)
+            {
+                lastImagesCompleted = result.ImagesCompleted;
+                _batchImagesCompleted = result.ImagesCompleted;
+                await ShowCompletedImageAsync(apiClient, imageUrl, result.ImagePath, ct).ConfigureAwait(false);
+
+                // 次の1枚の経過時間として数え直す(バッチ全体の累計はそのまま継続)。
+                _generatingStopwatch = Stopwatch.StartNew();
             }
 
-            if (result.ImageUrl is not string imageUrl)
+            switch (result.Status)
             {
-                _dispatcherQueue.TryEnqueue(() => StatusText = ResourceLoader.GetString("Generation_NoImageReturned"));
-                return;
+                case "completed":
+                    if (_batchTotalImages <= 1)
+                    {
+                        double doneSeconds = _generatingStopwatch.Elapsed.TotalSeconds;
+                        _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Done"), doneSeconds));
+                    }
+
+                    return;
+                case "cancelled":
+                    _dispatcherQueue.TryEnqueue(() => StatusText = ResourceLoader.GetString("Generation_Cancelled"));
+                    return;
+                case "failed":
+                    _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), result.Error));
+                    return;
             }
 
-            byte[] imageBytes = await apiClient.DownloadImageAsync(imageUrl, ct).ConfigureAwait(false);
+            await Task.Delay(PollInterval, ct).ConfigureAwait(false);
+        }
+    }
 
-            double elapsedSeconds = _generatingStopwatch.Elapsed.TotalSeconds;
+    async Task ShowCompletedImageAsync(BackendApiClient apiClient, string imageUrl, string? imagePath, CancellationToken ct)
+    {
+        byte[] imageBytes = await apiClient.DownloadImageAsync(imageUrl, ct).ConfigureAwait(false);
 
-            _dispatcherQueue.TryEnqueue(async void () =>
+        TaskCompletionSource displayed = new();
+        _dispatcherQueue.TryEnqueue(async void () =>
+        {
+            try
             {
                 InMemoryRandomAccessStream stream = new();
                 await stream.WriteAsync(imageBytes.AsBuffer());
@@ -250,26 +360,17 @@ sealed class GenerationViewModel : INotifyPropertyChanged
                 BitmapImage bitmap = new();
                 await bitmap.SetSourceAsync(stream);
                 ResultImageBytes = imageBytes;
-                ResultImagePath = result.ImagePath;
+                ResultImagePath = imagePath;
                 ResultImage = bitmap;
-                StatusText = string.Format(ResourceLoader.GetString("Generation_Done"), elapsedSeconds);
-            });
-        }
-        catch (Exception ex)
-        {
-            _dispatcherQueue.TryEnqueue(() => StatusText = string.Format(ResourceLoader.GetString("Generation_Error"), ex.Message));
-        }
-        finally
-        {
-            // ConfigureAwait(false) 後はスレッドプール上で実行され得るため、経過時間タイマーを
-            // 所有する UI スレッド上でまとめて停止・状態解除する。
-            _dispatcherQueue.TryEnqueue(() =>
+                ImageCompleted?.Invoke(this, EventArgs.Empty);
+            }
+            finally
             {
-                _generatingElapsedTimer.Stop();
-                _generatingStopwatch.Stop();
-                IsGenerating = false;
-            });
-        }
+                displayed.TrySetResult();
+            }
+        });
+
+        await displayed.Task.ConfigureAwait(false);
     }
 
     static bool TryParseSeed(string seedText, out long? seed)

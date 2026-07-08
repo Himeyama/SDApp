@@ -19,17 +19,40 @@ def test_samplers(client: TestClient) -> None:
     assert "euler_a" in response.json()
 
 
-def test_text_to_image_returns_completed_job(client: TestClient) -> None:
+def test_text_to_image_starts_a_queued_job(client: TestClient) -> None:
     response = client.post(
         "/api/v1/generations/text-to-image",
         json={"prompt": "a cat wearing sunglasses", "steps": 4},
     )
     assert response.status_code == 200
     body = response.json()
+    assert body["job_id"]
+    assert body["status"] in ("queued", "running", "completed")
+
+
+def test_text_to_image_job_completes_with_image(client: TestClient, wait_for_job_done) -> None:
+    response = client.post(
+        "/api/v1/generations/text-to-image",
+        json={"prompt": "a cat wearing sunglasses", "steps": 4},
+    )
+    job_id = response.json()["job_id"]
+
+    body = wait_for_job_done(client, job_id)
+
     assert body["status"] == "completed"
     assert body["image_url"].startswith("/api/v1/images/")
     assert Path(body["image_path"]).is_absolute()
     assert Path(body["image_path"]).name == body["image_url"].removeprefix("/api/v1/images/")
+
+
+def test_get_generation_job_missing_returns_404(client: TestClient) -> None:
+    response = client.get("/api/v1/generations/no-such-job")
+    assert response.status_code == 404
+
+
+def test_cancel_generation_job_missing_returns_404(client: TestClient) -> None:
+    response = client.delete("/api/v1/generations/no-such-job")
+    assert response.status_code == 404
 
 
 def test_text_to_image_rejects_invalid_dimensions(client: TestClient) -> None:
@@ -129,7 +152,7 @@ def test_list_models_scans_model_directory(client: TestClient, tmp_path) -> None
     model_ids = [model["model_id"] for model in client.get("/api/v1/models").json()]
 
     assert str(model_dir / "a.safetensors") in model_ids
-    assert str(model_dir / "sub" / "b.ckpt") in model_ids
+    assert str(model_dir / "sub" / "b.ckpt") not in model_ids
     assert str(model_dir / "notes.txt") not in model_ids
 
 
@@ -145,7 +168,7 @@ def test_list_loras_scans_lora_directory(client: TestClient, tmp_path) -> None:
 
     lora_ids = [item["lora_id"] for item in client.get("/api/v1/loras").json()]
 
-    assert lora_ids == [str(lora_dir / "deep" / "l2.safetensors"), str(lora_dir / "l1.safetensors")]
+    assert lora_ids == [str(lora_dir / "l1.safetensors")]
 
 
 def test_list_loras_empty_when_unset(client: TestClient) -> None:
@@ -155,7 +178,9 @@ def test_list_loras_empty_when_unset(client: TestClient) -> None:
     assert response.json() == []
 
 
-def test_text_to_image_forwards_loras(client: TestClient, mock_pipeline_manager) -> None:
+def test_text_to_image_forwards_loras(
+    client: TestClient, mock_pipeline_manager, wait_for_job_done
+) -> None:
     response = client.post(
         "/api/v1/generations/text-to-image",
         json={
@@ -164,8 +189,9 @@ def test_text_to_image_forwards_loras(client: TestClient, mock_pipeline_manager)
             "loras": [{"model_id": "some/lora", "weight": 0.8}],
         },
     )
+    job_id = response.json()["job_id"]
 
-    assert response.status_code == 200
+    assert wait_for_job_done(client, job_id)["status"] == "completed"
     _, kwargs = mock_pipeline_manager.generate.call_args
     assert [lora.model_id for lora in kwargs["loras"]] == ["some/lora"]
     assert [lora.weight for lora in kwargs["loras"]] == [0.8]

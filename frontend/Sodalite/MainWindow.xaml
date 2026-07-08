@@ -13,6 +13,15 @@
     </Window.SystemBackdrop>
 
     <Grid RowDefinitions="Auto,*,Auto">
+        <Grid.Resources>
+            <Style x:Key="StatusBarIconButtonStyle" TargetType="Button">
+                <Setter Property="Padding" Value="4" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Opacity" Value="0.7" />
+            </Style>
+        </Grid.Resources>
+
         <Grid x:Name="TitleBarGrid" Grid.Row="0" Height="48" Background="Transparent">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
                         Margin="16,0,0,0" Spacing="8">
@@ -47,11 +56,18 @@
 
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 Padding="16,8">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
                 <TextBlock x:Name="StatusBarTextBlock" Grid.Column="0"
                            Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
 
-                <StackPanel x:Name="SystemStatsPanel" Grid.Column="1" Orientation="Horizontal"
+                <Button x:Name="SkeletonScreenToggleButton" Grid.Column="1"
+                        x:Uid="MainWindow_SkeletonScreenToggleButton"
+                        Style="{StaticResource StatusBarIconButtonStyle}"
+                        Margin="0,0,16,0" Click="SkeletonScreenToggleButton_Click">
+                    <FontIcon x:Name="SkeletonScreenToggleIcon" Glyph="&#xE7B3;" FontSize="14" />
+                </Button>
+
+                <StackPanel x:Name="SystemStatsPanel" Grid.Column="2" Orientation="Horizontal"
                             Spacing="12" Margin="0,0,16,0" Visibility="Collapsed">
                     <StackPanel Orientation="Horizontal" Spacing="4" Opacity="0.7"
                                 ToolTipService.ToolTip="CPU">
@@ -87,12 +103,12 @@
                     </StackPanel>
                 </StackPanel>
 
-                <HyperlinkButton x:Name="GalleryButton" Grid.Column="2"
+                <HyperlinkButton x:Name="GalleryButton" Grid.Column="3"
                                  Padding="0" Margin="0,0,16,0" IsEnabled="False" Click="GalleryButton_Click">
                     <TextBlock x:Uid="MainWindow_GalleryButtonLabel"
                                Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7" />
                 </HyperlinkButton>
-                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="3"
+                <HyperlinkButton x:Name="ModelSelectionButton" Grid.Column="4"
                                  Padding="0" IsEnabled="False" Click="ModelSelectionButton_Click">
                     <TextBlock x:Name="StatusBarDeviceInfoTextBlock"
                                Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" />

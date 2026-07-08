@@ -9,6 +9,7 @@ sealed record GenerationRequest(
     double CfgScale = 7.0,
     int Width = 512,
     int Height = 512,
+    int BatchSize = 1,
     string Sampler = "euler_a",
     long? Seed = null,
     IReadOnlyList<LoraSelection>? Loras = null);

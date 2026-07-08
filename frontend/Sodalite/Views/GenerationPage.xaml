@@ -58,7 +58,7 @@
                     <TextBlock x:Name="CfgScaleValueTextBlock" Text="7.0" Opacity="0.7" />
                 </StackPanel>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <StackPanel Grid.Column="0" Spacing="4">
                         <TextBlock x:Uid="Generation_WidthLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
                         <NumberBox x:Name="WidthNumberBox" Minimum="64" Maximum="2048"
@@ -71,10 +71,20 @@
                                    SmallChange="8" LargeChange="64" Value="1024"
                                    SpinButtonPlacementMode="Compact" />
                     </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="4">
+                        <TextBlock x:Uid="Generation_BatchSizeLabel" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                        <NumberBox x:Name="BatchSizeNumberBox" Minimum="1" Maximum="120"
+                                   SmallChange="1" LargeChange="10" Value="1"
+                                   SpinButtonPlacementMode="Compact" />
+                    </StackPanel>
                 </Grid>
 
-                <Button x:Name="GenerateButton" HorizontalAlignment="Stretch"
-                        Style="{ThemeResource AccentButtonStyle}" Click="GenerateButton_Click" IsEnabled="False" />
+                <Grid>
+                    <Button x:Name="GenerateButton" HorizontalAlignment="Stretch"
+                            Style="{ThemeResource AccentButtonStyle}" Click="GenerateButton_Click" IsEnabled="False" />
+                    <Button x:Name="CancelButton" x:Uid="Generation_CancelButton" HorizontalAlignment="Stretch"
+                            Click="CancelButton_Click" Visibility="Collapsed" />
+                </Grid>
             </StackPanel>
         </ScrollViewer>
 

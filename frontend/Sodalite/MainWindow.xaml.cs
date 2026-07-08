@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Windows.ApplicationModel.Resources;
@@ -257,6 +258,13 @@ public sealed partial class MainWindow : Window
     {
         _generationPage.ApplyHistoryParameters(image);
         await SlideToPageAsync(_generationPage, reverse: true);
+    }
+
+    void SkeletonScreenToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        bool isEnabled = _generationPage.ToggleSkeletonScreen();
+        SkeletonScreenToggleIcon.Glyph = isEnabled ? "" : "";
+        SkeletonScreenToggleButton.Opacity = isEnabled ? 0.7 : 1.0;
     }
 
     async void MainWindow_Closed(object sender, WindowEventArgs args)

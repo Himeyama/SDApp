@@ -50,12 +50,8 @@ def test_load_model_falls_back_to_sd15_when_sdxl_load_fails(tmp_path) -> None:
     checkpoint.write_bytes(b"fake checkpoint data")
 
     with (
-        patch(
-            "sodalite_backend.inference.pipeline_manager.StableDiffusionXLPipeline"
-        ) as mock_sdxl,
-        patch(
-            "sodalite_backend.inference.pipeline_manager.StableDiffusionPipeline"
-        ) as mock_sd15,
+        patch("sodalite_backend.inference.pipeline_manager.StableDiffusionXLPipeline") as mock_sdxl,
+        patch("sodalite_backend.inference.pipeline_manager.StableDiffusionPipeline") as mock_sd15,
     ):
         mock_sdxl.from_single_file.side_effect = RuntimeError("not an sdxl checkpoint")
         mock_sd15.from_single_file.return_value.to.return_value = MagicMock()
@@ -73,22 +69,25 @@ def test_generate_loads_and_activates_loras_by_weight() -> None:
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
-        loras=[LoraSpec(model_id="a/lora", weight=0.8), LoraSpec(model_id="b/lora", weight=0.3)],
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            loras=[
+                LoraSpec(model_id="a/lora", weight=0.8),
+                LoraSpec(model_id="b/lora", weight=0.3),
+            ],
+        )
     )
 
     assert pipeline.load_lora_into_unet.call_count == 2
-    pipeline.set_adapters.assert_called_once_with(
-        ["lora_0", "lora_1"], adapter_weights=[0.8, 0.3]
-    )
+    pipeline.set_adapters.assert_called_once_with(["lora_0", "lora_1"], adapter_weights=[0.8, 0.3])
 
 
 def test_generate_skips_text_encoder_lora_diffusers_cannot_parse() -> None:
@@ -101,16 +100,18 @@ def test_generate_skips_text_encoder_lora_diffusers_cannot_parse() -> None:
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
-        loras=[LoraSpec(model_id="a/lora", weight=1.0)],
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            loras=[LoraSpec(model_id="a/lora", weight=1.0)],
+        )
     )
 
     # The UNet still loads and the adapter is activated despite the encoder failure.
@@ -128,16 +129,21 @@ def test_generate_skips_incompatible_lora_but_applies_the_rest() -> None:
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
-        loras=[LoraSpec(model_id="bad/lora", weight=0.5), LoraSpec(model_id="good/lora", weight=0.9)],
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            loras=[
+                LoraSpec(model_id="bad/lora", weight=0.5),
+                LoraSpec(model_id="good/lora", weight=0.9),
+            ],
+        )
     )
 
     # The bad adapter is dropped and only the compatible one is activated.
@@ -153,16 +159,18 @@ def test_generate_does_not_activate_adapters_when_all_loras_incompatible() -> No
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
-        loras=[LoraSpec(model_id="bad/lora", weight=1.0)],
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            loras=[LoraSpec(model_id="bad/lora", weight=1.0)],
+        )
     )
 
     pipeline.set_adapters.assert_not_called()
@@ -175,16 +183,18 @@ def test_generate_unloads_loras_after_generation() -> None:
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
-        loras=[LoraSpec(model_id="a/lora", weight=1.0)],
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            loras=[LoraSpec(model_id="a/lora", weight=1.0)],
+        )
     )
 
     pipeline.unload_lora_weights.assert_called_once()
@@ -196,17 +206,72 @@ def test_generate_without_loras_does_not_touch_lora_apis() -> None:
     manager._pipeline = pipeline
     manager.set_sampler = MagicMock()
 
-    manager.generate(
-        prompt="a cat",
-        negative_prompt="",
-        steps=4,
-        cfg_scale=7.0,
-        width=64,
-        height=64,
-        sampler="euler_a",
-        seed=None,
+    list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+        )
     )
 
     pipeline.load_lora_weights.assert_not_called()
     pipeline.set_adapters.assert_not_called()
     pipeline.unload_lora_weights.assert_not_called()
+
+
+def test_generate_yields_one_image_per_batch_item() -> None:
+    manager = _make_manager()
+    pipeline = MagicMock()
+    manager._pipeline = pipeline
+    manager.set_sampler = MagicMock()
+
+    images = list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            batch_size=3,
+        )
+    )
+
+    assert len(images) == 3
+    assert pipeline.call_count == 3
+
+
+def test_generate_stops_early_when_should_stop_becomes_true() -> None:
+    manager = _make_manager()
+    pipeline = MagicMock()
+    manager._pipeline = pipeline
+    manager.set_sampler = MagicMock()
+
+    stop_after_first = iter([False, True, True, True])
+
+    images = list(
+        manager.generate(
+            prompt="a cat",
+            negative_prompt="",
+            steps=4,
+            cfg_scale=7.0,
+            width=64,
+            height=64,
+            sampler="euler_a",
+            seed=None,
+            batch_size=5,
+            should_stop=lambda: next(stop_after_first),
+        )
+    )
+
+    # should_stop is checked before each image; it flips to True before the
+    # second image starts, so only the first image is produced.
+    assert len(images) == 1
+    assert pipeline.call_count == 1

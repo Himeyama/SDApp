@@ -2,6 +2,7 @@
 
 import contextlib
 import gc
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import torch
@@ -11,6 +12,7 @@ from diffusers import (
     StableDiffusionPipeline,
     StableDiffusionXLPipeline,
 )
+from PIL import Image
 
 from sodalite_backend.inference.samplers import SAMPLER_CLASSES
 from sodalite_backend.schemas.generation import LoraSpec, Sampler
@@ -159,26 +161,42 @@ class PipelineManager:
         height: int,
         sampler: Sampler,
         seed: int | None,
+        batch_size: int = 1,
         loras: list[LoraSpec] | None = None,
-    ):
+        should_stop: Callable[[], bool] | None = None,
+    ) -> Iterator[Image.Image]:
+        """Yield `batch_size` images one at a time, each as soon as it's ready.
+
+        Generating one-by-one (rather than diffusers' native batching) keeps peak
+        VRAM usage flat regardless of batch size, lets each image use a distinct,
+        reproducible seed (base seed + index) instead of all sharing one, and lets
+        the caller react to (save, display) each image as it finishes instead of
+        waiting for the whole batch. `should_stop` is polled between images so a
+        long batch can be cancelled without waiting for it to run to completion.
+        """
         self.set_sampler(sampler)
-        generator = None
-        if seed is not None:
-            generator = torch.Generator(device=self.device).manual_seed(seed)
 
         if loras:
             self._apply_loras(loras)
         try:
-            result = self._pipeline(
-                prompt=prompt,
-                negative_prompt=negative_prompt or None,
-                num_inference_steps=steps,
-                guidance_scale=cfg_scale,
-                width=width,
-                height=height,
-                generator=generator,
-            )
+            for index in range(batch_size):
+                if should_stop is not None and should_stop():
+                    return
+
+                generator = None
+                if seed is not None:
+                    generator = torch.Generator(device=self.device).manual_seed(seed + index)
+
+                result = self._pipeline(
+                    prompt=prompt,
+                    negative_prompt=negative_prompt or None,
+                    num_inference_steps=steps,
+                    guidance_scale=cfg_scale,
+                    width=width,
+                    height=height,
+                    generator=generator,
+                )
+                yield result.images[0]
         finally:
             if loras:
                 self._clear_loras()
-        return result.images[0]

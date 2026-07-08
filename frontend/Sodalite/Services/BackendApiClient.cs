@@ -15,7 +15,7 @@ sealed class BackendApiClient(int port) : IDisposable
     /// <summary>サムネイル等、相対URLを完全URLに組み立てる呼び出し元向けに公開する。</summary>
     public Uri BaseAddress => _http.BaseAddress!;
 
-    public async Task<GenerationResult> GenerateTextToImageAsync(GenerationRequest request, CancellationToken ct)
+    public async Task<GenerationResult> StartTextToImageAsync(GenerationRequest request, CancellationToken ct)
     {
         List<LoraBody> loras = request.Loras?
             .Select(lora => new LoraBody(lora.ModelId, lora.Weight))
@@ -28,6 +28,7 @@ sealed class BackendApiClient(int port) : IDisposable
             request.CfgScale,
             request.Width,
             request.Height,
+            request.BatchSize,
             request.Sampler,
             request.Seed,
             loras);
@@ -37,13 +38,38 @@ sealed class BackendApiClient(int port) : IDisposable
             .ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        GenerationJobDto dto = await response.Content
+        return ToGenerationResult(await response.Content
             .ReadFromJsonAsync<GenerationJobDto>(ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Empty response from backend."));
+    }
+
+    public async Task<GenerationResult> GetGenerationJobAsync(string jobId, CancellationToken ct)
+    {
+        GenerationJobDto dto = await _http
+            .GetFromJsonAsync<GenerationJobDto>($"/api/v1/generations/{Uri.EscapeDataString(jobId)}", ct)
             .ConfigureAwait(false)
             ?? throw new InvalidOperationException("Empty response from backend.");
 
-        return new GenerationResult(dto.JobId, dto.Status, dto.ImageUrl, dto.ImagePath, dto.Error);
+        return ToGenerationResult(dto);
     }
+
+    public async Task CancelGenerationJobAsync(string jobId, CancellationToken ct)
+    {
+        HttpResponseMessage response = await _http
+            .DeleteAsync($"/api/v1/generations/{Uri.EscapeDataString(jobId)}", ct)
+            .ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+    }
+
+    static GenerationResult ToGenerationResult(GenerationJobDto dto) => new(
+        dto.JobId,
+        dto.Status,
+        dto.ImagesCompleted,
+        dto.TotalImages,
+        dto.ImageUrl,
+        dto.ImagePath,
+        dto.Error);
 
     public async Task<byte[]> DownloadImageAsync(string imageUrl, CancellationToken ct) =>
         await _http.GetByteArrayAsync(imageUrl, ct).ConfigureAwait(false);
@@ -117,6 +143,7 @@ sealed class BackendApiClient(int port) : IDisposable
                 parameters.CfgScale,
                 parameters.Width,
                 parameters.Height,
+                parameters.BatchSize,
                 parameters.Sampler,
                 parameters.Seed,
                 parameters.Loras.Select(lora => new LoraSelection(lora.ModelId, lora.Weight)).ToList())
@@ -159,6 +186,7 @@ sealed class BackendApiClient(int port) : IDisposable
         [property: JsonPropertyName("cfg_scale")] double CfgScale,
         int Width,
         int Height,
+        [property: JsonPropertyName("batch_size")] int BatchSize,
         string Sampler,
         long? Seed,
         List<LoraBody> Loras);
@@ -168,6 +196,8 @@ sealed class BackendApiClient(int port) : IDisposable
     sealed record GenerationJobDto(
         [property: JsonPropertyName("job_id")] string JobId,
         string Status,
+        [property: JsonPropertyName("images_completed")] int ImagesCompleted,
+        [property: JsonPropertyName("total_images")] int TotalImages,
         [property: JsonPropertyName("image_url")] string? ImageUrl,
         [property: JsonPropertyName("image_path")] string? ImagePath,
         string? Error);
@@ -191,6 +221,7 @@ sealed class BackendApiClient(int port) : IDisposable
         [property: JsonPropertyName("cfg_scale")] double? CfgScale,
         int? Width,
         int? Height,
+        [property: JsonPropertyName("batch_size")] int? BatchSize,
         string? Sampler,
         long? Seed,
         List<LoraBody> Loras);

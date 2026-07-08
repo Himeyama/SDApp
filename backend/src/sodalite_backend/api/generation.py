@@ -1,16 +1,14 @@
-"""Text-to-image generation endpoint.
+"""Text-to-image generation endpoints.
 
-Phase 2 runs generation synchronously within the request, but the response
-shape already carries a `job_id` so the API can move to async job polling
-(Phase 3) without a breaking change.
+Generation runs on a background thread owned by `JobManager`: the POST below
+starts the job and returns immediately with a `job_id`, and the frontend
+polls `GET /{job_id}` for progress and each completed image as the batch
+runs. `DELETE /{job_id}` requests cancellation, which takes effect before the
+next image in the batch starts.
 """
 
-import uuid
+from fastapi import APIRouter, HTTPException, Request
 
-from fastapi import APIRouter, Request
-
-from sodalite_backend.imaging.png_metadata import save_with_metadata
-from sodalite_backend.imaging.storage import new_image_path
 from sodalite_backend.schemas.generation import GenerationJob, TextToImageRequest
 
 router = APIRouter(prefix="/generations", tags=["generations"])
@@ -18,29 +16,23 @@ router = APIRouter(prefix="/generations", tags=["generations"])
 
 @router.post("/text-to-image", response_model=GenerationJob)
 def create_text_to_image(request: Request, body: TextToImageRequest) -> GenerationJob:
-    pipeline_manager = request.app.state.pipeline_manager
+    job_manager = request.app.state.job_manager
+    return job_manager.start_text_to_image(body)
 
-    image = pipeline_manager.generate(
-        prompt=body.prompt,
-        negative_prompt=body.negative_prompt,
-        steps=body.steps,
-        cfg_scale=body.cfg_scale,
-        width=body.width,
-        height=body.height,
-        sampler=body.sampler,
-        seed=body.seed,
-        loras=body.loras,
-    )
 
-    image_path = new_image_path()
-    save_with_metadata(image, image_path, body.model_dump())
+@router.get("/{job_id}", response_model=GenerationJob)
+def get_generation_job(request: Request, job_id: str) -> GenerationJob:
+    job_manager = request.app.state.job_manager
+    job = job_manager.get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
 
-    return GenerationJob(
-        job_id=uuid.uuid4().hex,
-        status="completed",
-        progress=1.0,
-        current_step=body.steps,
-        total_steps=body.steps,
-        image_url=f"/api/v1/images/{image_path.name}",
-        image_path=str(image_path.resolve()),
-    )
+
+@router.delete("/{job_id}", response_model=GenerationJob)
+def cancel_generation_job(request: Request, job_id: str) -> GenerationJob:
+    job_manager = request.app.state.job_manager
+    job = job_manager.cancel_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job

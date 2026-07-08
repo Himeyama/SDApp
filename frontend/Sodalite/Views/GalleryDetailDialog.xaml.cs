@@ -76,6 +76,11 @@ sealed partial class GalleryDetailDialog : ContentDialog
             parts.Add($"Size: {width}x{height}");
         }
 
+        if (parameters.BatchSize is int batchSize)
+        {
+            parts.Add($"Batch: {batchSize}");
+        }
+
         if (parameters.Loras.Count > 0)
         {
             string loraText = string.Join(", ", parameters.Loras.Select(lora => $"{lora.ModelId}:{lora.Weight}"));

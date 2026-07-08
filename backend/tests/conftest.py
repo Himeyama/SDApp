@@ -1,5 +1,6 @@
 """Shared fixtures for the API test suite."""
 
+import time
 from collections.abc import Iterator
 from unittest.mock import MagicMock
 
@@ -13,7 +14,7 @@ def mock_pipeline_manager() -> MagicMock:
     manager = MagicMock()
     manager.device = "cpu"
     manager.model_id = "stub/model"
-    manager.generate.return_value = Image.new("RGB", (8, 8))
+    manager.generate.return_value = [Image.new("RGB", (8, 8))]
     return manager
 
 
@@ -28,3 +29,22 @@ def client(mock_pipeline_manager: MagicMock, tmp_path, monkeypatch) -> Iterator[
     app = main_module.create_app("stub/model")
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def wait_for_job_done():
+    """Poll a generation job until it leaves queued/running, for use in tests.
+
+    Generation now runs on a background thread, so a freshly-started job may
+    still be `queued` the instant the POST response comes back.
+    """
+
+    def _wait(client: TestClient, job_id: str, timeout: float = 5.0) -> dict:
+        deadline = time.monotonic() + timeout
+        job = client.get(f"/api/v1/generations/{job_id}").json()
+        while job["status"] in ("queued", "running") and time.monotonic() < deadline:
+            time.sleep(0.01)
+            job = client.get(f"/api/v1/generations/{job_id}").json()
+        return job
+
+    return _wait

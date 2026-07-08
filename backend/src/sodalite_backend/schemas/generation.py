@@ -28,6 +28,7 @@ class TextToImageRequest(BaseModel):
     cfg_scale: float = Field(default=7.0, ge=0.0, le=30.0)
     width: int = Field(default=512, ge=64, le=2048, multiple_of=8)
     height: int = Field(default=512, ge=64, le=2048, multiple_of=8)
+    batch_size: int = Field(default=1, ge=1, le=120)
     sampler: Sampler = "euler_a"
     seed: int | None = None
     loras: list[LoraSpec] = Field(default_factory=list)
@@ -52,6 +53,7 @@ class GalleryParameters(BaseModel):
     cfg_scale: float | None = None
     width: int | None = None
     height: int | None = None
+    batch_size: int | None = None
     sampler: str | None = None
     seed: int | None = None
     loras: list[GalleryLoraInfo] = Field(default_factory=list)
@@ -73,11 +75,22 @@ class GalleryImageInfo(BaseModel):
 
 
 class GenerationJob(BaseModel):
+    """Snapshot of a text-to-image job, including any batch progress so far.
+
+    `images_completed` counts images already saved; the frontend polls and
+    reacts each time this increases so results are shown one at a time
+    instead of only after the whole batch finishes. `image_url`/`image_path`
+    always reflect the most recently completed image in the batch, so a
+    client can display it immediately without tracking history itself.
+    """
+
     job_id: str
     status: JobStatus
     progress: float = 0.0
     current_step: int = 0
     total_steps: int = 0
+    images_completed: int = 0
+    total_images: int = 1
     image_url: str | None = None
     image_path: str | None = None
     error: str | None = None

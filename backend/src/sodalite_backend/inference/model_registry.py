@@ -61,13 +61,13 @@ def _list_directory_models(active_model_id: str) -> list[ModelInfo]:
 
 
 def scan_checkpoint_files(directory: Path) -> list[Path]:
-    """Recursively find supported checkpoint files under directory, sorted by path."""
+    """Find supported checkpoint files directly under directory (non-recursive), sorted by path."""
     if not directory.is_dir():
         return []
 
     files = [
         path
-        for path in directory.rglob("*")
+        for path in directory.iterdir()
         if path.is_file() and path.suffix.lower() in CHECKPOINT_EXTENSIONS
     ]
     return sorted(files)
