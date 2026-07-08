@@ -80,6 +80,15 @@
   <data name="MainWindow_UvNotFound" xml:space="preserve">
     <value>uv was not found. The Sodalite backend requires uv. Please install it from https://docs.astral.sh/uv/ and then restart the app.</value>
   </data>
+  <data name="App_AlreadyRunningTitle" xml:space="preserve">
+    <value>Sodalite is already running</value>
+  </data>
+  <data name="App_AlreadyRunningMessage" xml:space="preserve">
+    <value>Sodalite is already running. Multiple instances are not allowed. Please use the existing window.</value>
+  </data>
+  <data name="App_AlreadyRunningCloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 
   <data name="ModelSelectionPage_Title.Text" xml:space="preserve">
     <value>Select model</value>
